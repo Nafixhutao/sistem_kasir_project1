@@ -45,7 +45,7 @@ class SetorTunaiController extends Controller
         $data['tanggal'] = Carbon::today();
         $data = BrilinkFeeService::withNasabahFee($data, 'setor_tunai', 'nominal_setor');
         $adminFee = BrilinkFeeService::adminFeeFrom($data);
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = TransaksiSetorTunai::create($data);
         ActivityLog::record('Setor Tunai', 'create', 'Admin menambahkan transaksi BRILink Setor Tunai sebesar Rp' . number_format($nominalSetor, 0, ',', '.') . ' dengan biaya admin Rp' . number_format($adminFee, 0, ',', '.'), $transaksi->toArray());

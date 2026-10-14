@@ -15,6 +15,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use App\Services\NotifikasiService;
+use App\Services\BusinessRequest;
+use Illuminate\Support\Facades\Validator;
 
 class PenjualanController extends Controller
 {
@@ -28,12 +30,13 @@ class PenjualanController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'request_id' => 'required|uuid',
             'items' => 'required|array|min:1',
             'items.*.id' => 'required|integer|min:1|max:4294967295|exists:barang,id',
             'items.*.jumlah' => 'required|integer|min:1',
             'metode_pembayaran' => 'required|in:tunai,qris',
             'uang_bayar' => 'required_if:metode_pembayaran,tunai|nullable|numeric|min:0',
-            'qris_order_id' => 'required_if:metode_pembayaran,qris|nullable|string|max:100|unique:pembayaran_qris,order_id',
+            'qris_order_id' => 'required_if:metode_pembayaran,qris|nullable|string|max:100',
         ], [
             'items.required' => 'Keranjang masih kosong.',
             'items.min' => 'Minimal pilih 1 barang untuk transaksi.',
@@ -45,7 +48,15 @@ class PenjualanController extends Controller
             'qris_order_id.unique' => 'Order ID QRIS ini sudah pernah dipakai transaksi.',
         ]);
 
-        $transaksi = DB::transaction(function () use ($data) {
+        $fingerprint = [
+            'items' => array_map(fn($item) => ['id'=>(int)$item['id'],'jumlah'=>(int)$item['jumlah']], $data['items']),
+            'metode_pembayaran' => $data['metode_pembayaran'],
+            'uang_bayar' => $data['metode_pembayaran']==='tunai' ? (float)$data['uang_bayar'] : null,
+            'qris_order_id' => $data['metode_pembayaran']==='qris' ? $data['qris_order_id'] : null,
+        ];
+        [$transaksi] = BusinessRequest::execute(TransaksiPenjualan::class, $data['request_id'], $request->user()->id, $fingerprint, function () use ($data, $request) {
+            // Check a new QRIS order only after the replay check; retries keep the old result.
+            Validator::make($data, ['qris_order_id'=>'nullable|unique:pembayaran_qris,order_id'], ['qris_order_id.unique'=>'Order ID QRIS ini sudah pernah dipakai transaksi.'])->validate();
             $items = collect($data['items'])->map(function ($item) {
                 $barang = Barang::lockForUpdate()->findOrFail($item['id']);
                 $jumlah = (int) $item['jumlah'];
@@ -74,7 +85,7 @@ class PenjualanController extends Controller
                 'total_harga' => $totalHarga,
                 'uang_bayar' => $data['metode_pembayaran'] === 'tunai' ? $data['uang_bayar'] : $totalHarga,
                 'kembalian' => $data['metode_pembayaran'] === 'tunai' ? ((float) $data['uang_bayar'] - $totalHarga) : 0,
-                'kasir' => 'admin'
+                'kasir' => $request->user()->username
             ]);
 
             foreach ($items as $item) {
@@ -109,10 +120,10 @@ class PenjualanController extends Controller
                 ]);
             }
 
-            return $transaksi->fresh('details');
+            ActivityLog::record('Penjualan', 'create', 'Mencatat transaksi penjualan ' . $transaksi->kode_transaksi, $transaksi->fresh('details')->toArray());
+            return $transaksi;
         });
-
-        ActivityLog::record('Penjualan', 'create', 'Mencatat transaksi penjualan ' . $transaksi->kode_transaksi, $transaksi->toArray());
+        $transaksi->load('details');
 
         return response()->json([
             'transaksi' => $transaksi,
@@ -284,6 +295,7 @@ class PenjualanController extends Controller
     public function retur(Request $request, $id)
     {
         $data = $request->validate([
+            'request_id' => 'required|uuid',
             'detail_penjualan_id' => 'required_without:detail_id|integer|min:1|max:4294967295|exists:detail_penjualan,id',
             'detail_id' => 'required_without:detail_penjualan_id|integer|min:1|max:4294967295|exists:detail_penjualan,id',
             'jumlah' => 'required|integer|min:1',
@@ -302,7 +314,15 @@ class PenjualanController extends Controller
             'metode_pengembalian_dana.in' => 'Penyelesaian retur tidak valid.',
         ]);
 
-        $retur = DB::transaction(function () use ($data, $id) {
+        $fingerprint = [
+            'transaksi_penjualan_id'=>(int)$id,
+            'detail_penjualan_id'=>(int)($data['detail_penjualan_id'] ?? $data['detail_id']),
+            'jumlah'=>(int)$data['jumlah'],
+            'alasan_retur'=>$data['alasan_retur'] ?? $data['alasan'],
+            'metode_pengembalian_dana'=>$data['metode_pengembalian_dana'] ?? 'tunai',
+            'keterangan'=>$data['keterangan'] ?? null,
+        ];
+        [$retur] = BusinessRequest::execute(ReturPelanggan::class, $data['request_id'], $request->user()->id, $fingerprint, function () use ($data, $id) {
             $transaksi = TransaksiPenjualan::findOrFail($id);
             if ($transaksi->status === 'batal') {
                 abort(422, 'Transaksi batal tidak bisa diretur.');
@@ -338,7 +358,7 @@ class PenjualanController extends Controller
                 NotifikasiService::syncStockNotification($barang, $previousStock);
             }
 
-            return ReturPelanggan::create([
+            $retur = ReturPelanggan::create([
                 'nomor_retur' => $this->generateNomorReturPelanggan(),
                 'transaksi_penjualan_id' => $transaksi->id,
                 'detail_penjualan_id' => $detail->id,
@@ -353,7 +373,6 @@ class PenjualanController extends Controller
                 'keterangan' => $data['keterangan'] ?? null,
                 'tanggal_retur' => today(),
             ])->load(['barang', 'transaksi']);
-        });
 
         $metodeLabel = match ($retur->metode_pengembalian_dana) {
             'penggantian_barang' => 'Penggantian Barang',
@@ -369,6 +388,9 @@ class PenjualanController extends Controller
             $retur->toArray()
         );
         NotifikasiService::returPelangganProcessed($retur);
+            return $retur;
+        });
+        $retur->load(['barang', 'transaksi']);
 
         return response()->json([
             'message' => 'Retur berhasil dicatat dan stok diperbarui',

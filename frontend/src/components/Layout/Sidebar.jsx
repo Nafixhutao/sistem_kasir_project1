@@ -1,17 +1,18 @@
 import React from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, FileText, Send, Wallet, HandCoins, Receipt, Smartphone, History, Settings, LogOut, ChevronLeft, ChevronRight, WalletCards, ReceiptText, BadgeDollarSign, RotateCcw } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, FileText, Send, Wallet, HandCoins, Receipt, Smartphone, History, Settings, LogOut, ChevronLeft, ChevronRight, WalletCards, ReceiptText, BadgeDollarSign, Truck, PackageMinus, Undo2, UsersRound } from 'lucide-react'
 import sultanCellLogo from '../../assets/sultan-cell-logo-round.png'
 
 const menuItems = [
   { divider: true, label: 'OPERASIONAL TOKO' },
   { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/barang', icon: Package, label: 'Data Barang' },
+  { path: '/data-supplier', icon: Truck, label: 'Data Supplier' },
   { path: '/transaksi-penjualan', icon: ShoppingCart, label: 'Transaksi Penjualan' },
   { path: '/laporan-penjualan', icon: FileText, label: 'Laporan Penjualan' },
   { path: '/pengeluaran-toko', icon: ReceiptText, label: 'Pengeluaran Toko' },
-  { path: '/retur-supplier', icon: RotateCcw, label: 'Retur Supplier' },
-  { path: '/retur-barang-pelanggan', icon: RotateCcw, label: 'Retur Barang Pelanggan' },
+  { path: '/retur-supplier', icon: PackageMinus, label: 'Retur Supplier' },
+  { path: '/retur-barang-pelanggan', icon: Undo2, label: 'Retur Barang Pelanggan' },
   { divider: true, label: 'LAYANAN BRILINK' },
   { path: '/transfer', icon: Send, label: 'Transfer' },
   { path: '/tarik-tunai', icon: Wallet, label: 'Tarik Tunai' },
@@ -25,8 +26,17 @@ const menuItems = [
   { path: '/pengaturan', icon: Settings, label: 'Pengaturan' },
 ]
 
-export default function Sidebar({ isOpen, toggleSidebar, onLogout }) {
+export default function Sidebar({ isOpen, toggleSidebar, onLogout, role }) {
   const navigate = useNavigate()
+  const ownerPaths = ['/dashboard','/barang','/data-supplier','/laporan-penjualan','/pengeluaran-toko','/retur-supplier','/retur-barang-pelanggan','/riwayat-brilink','/biaya-admin','/pengaturan']
+  const settingsPaths = ['/biaya-admin', '/pengaturan']
+  const items = role === 'admin' ? [
+    { divider: true, label: 'MONITORING OPERASIONAL' },
+    ...menuItems.filter(item => ownerPaths.includes(item.path) && !settingsPaths.includes(item.path)),
+    { divider: true, label: 'PENGATURAN SISTEM' },
+    ...menuItems.filter(item => settingsPaths.includes(item.path)),
+    { path: '/manajemen-pengguna', icon: UsersRound, label: 'Manajemen Pengguna' },
+  ] : menuItems
 
   const navigateInCurrentTab = (event, path) => {
     if (event.button === 2) return
@@ -44,7 +54,7 @@ export default function Sidebar({ isOpen, toggleSidebar, onLogout }) {
           {isOpen && (
             <div>
               <span>Sultan Cell</span>
-              <p>Admin Kasir</p>
+              <p>{role === 'admin' ? 'Admin' : 'Kasir'}</p>
             </div>
           )}
         </div>
@@ -53,7 +63,7 @@ export default function Sidebar({ isOpen, toggleSidebar, onLogout }) {
         </button>
       </div>
       <nav className="sidebar-nav">
-        {menuItems.map((item, index) => {
+        {items.map((item, index) => {
           if (item.divider) return (
             <div key={index} className={`sidebar-divider ${index === 0 ? 'first' : ''}`}>
               {isOpen && <p>{item.label}</p>}

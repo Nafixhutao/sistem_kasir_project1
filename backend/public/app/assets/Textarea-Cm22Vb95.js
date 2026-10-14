@@ -1,0 +1,1 @@
+import{k as e,t}from"./index-DeuCuyGN.js";e();var n=t();function r({className:e=``,variant:t=`primary`,children:r,...i}){return(0,n.jsx)(`button`,{className:`ui-button ${t} ${e}`.trim(),...i,children:r})}function i({className:e=``,...t}){return(0,n.jsx)(`textarea`,{className:`ui-textarea ${e}`.trim(),...t})}export{r as n,i as t};

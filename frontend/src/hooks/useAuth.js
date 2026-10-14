@@ -1,21 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext, useContext, createElement } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api, { getApiErrorMessage } from '../services/api'
 
 const notifyAuthChanged = () => window.dispatchEvent(new Event('auth-token-changed'))
 
-export function useAuth() {
+const AuthContext = createContext(null)
+export function useAuth() { return useContext(AuthContext) }
+export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('token'))
   const [user, setUser] = useState(null)
   const navigate = useNavigate()
 
-  useEffect(() => { if (token) fetchUser() }, [token])
+  useEffect(() => {
+    if (!token) return
+    let cancelled = false
+    api.get('/me').then(res => {
+      if (!cancelled && localStorage.getItem('token') === token) setUser(res.data)
+    }).catch(() => {
+      if (!cancelled && localStorage.getItem('token') === token) {
+        localStorage.removeItem('token'); setToken(null); setUser(null); notifyAuthChanged()
+      }
+    })
+    return () => { cancelled = true }
+  }, [token])
 
   useEffect(() => {
     const syncToken = () => {
       const nextToken = localStorage.getItem('token')
+      if (token !== nextToken) setUser(null)
       setToken(nextToken)
-      if (!nextToken) setUser(null)
     }
     window.addEventListener('auth-token-changed', syncToken)
     window.addEventListener('storage', syncToken)
@@ -24,19 +37,7 @@ export function useAuth() {
       window.removeEventListener('auth-token-changed', syncToken)
       window.removeEventListener('storage', syncToken)
     }
-  }, [])
-
-  const fetchUser = async () => {
-    try {
-      const res = await api.get('/me')
-      setUser(res.data)
-    } catch (e) {
-      localStorage.removeItem('token')
-      setToken(null)
-      setUser(null)
-      notifyAuthChanged()
-    }
-  }
+  }, [token])
 
   const login = async (username, password) => {
     try {
@@ -52,14 +53,20 @@ export function useAuth() {
     }
   }
 
-  const logout = async () => {
-    try { await api.post('/logout') } catch (e) {}
+  const clearSession = (message) => {
     localStorage.removeItem('token')
     setToken(null)
     setUser(null)
     notifyAuthChanged()
-    navigate('/login')
+    navigate('/login', { replace: true, state: message ? { message } : null })
   }
 
-  return { token, user, login, logout }
+  const logout = async () => {
+    try { await api.post('/logout') } catch (e) {}
+    clearSession()
+  }
+
+  const passwordChanged = () => clearSession('Password berhasil diubah. Silakan login kembali.')
+
+  return createElement(AuthContext.Provider, { value: { token, user, login, logout, passwordChanged } }, children)
 }

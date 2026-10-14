@@ -43,7 +43,7 @@ class TarikTunaiController extends Controller
         $data['tanggal'] = Carbon::today();
         $data = BrilinkFeeService::withNasabahFee($data, 'tarik_tunai', 'nominal_tarik');
         $adminFee = BrilinkFeeService::adminFeeFrom($data);
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = TransaksiTarikTunai::create($data);
         ActivityLog::record('Tarik Tunai', 'create', 'Admin menambahkan transaksi BRILink Tarik Tunai sebesar Rp' . number_format($nominalTarik, 0, ',', '.') . ' dengan biaya admin Rp' . number_format($adminFee, 0, ',', '.'), $transaksi->toArray());

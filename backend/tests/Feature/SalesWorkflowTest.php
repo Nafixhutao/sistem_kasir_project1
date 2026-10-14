@@ -53,6 +53,8 @@ class SalesWorkflowTest extends TestCase
         $this->assertSame(10, (int) $barang->fresh()->stok);
 
         Http::preventStrayRequests();
+        // Isolated suite must never depend on a real payment credential.
+        config(['services.midtrans.server_key' => bin2hex(random_bytes(24))]);
         Http::fake([
             '*v2/charge' => Http::response([
                 'transaction_status' => 'pending',

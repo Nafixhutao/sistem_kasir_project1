@@ -5,51 +5,48 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use App\Models\ActivityLog;
+use App\Services\PasswordManagement;
+use App\Support\PasswordPolicy;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
         $data = $request->validate([
-            'username' => 'required|string|max:191',
-            'password' => 'required',
+            'username' => 'required|string|max:50',
+            'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $data['username'])->first();
-
-        if (!$user || !Hash::check($data['password'], $user->password)) {
-            return response()->json(['message' => 'Username atau password salah'], 401);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login berhasil',
-            'user' => $user,
-            'token' => $token
-        ]);
+        return DB::transaction(function () use ($data) {
+            $user = User::where('username', $data['username'])->lockForUpdate()->first();
+            if (!$user || !$user->is_active || !Hash::check($data['password'], $user->password)) {
+                return response()->json(['message' => 'Username atau password salah'], 401);
+            }
+            $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json(['message'=>'Login berhasil', 'user'=>$user->only(['id','name','username','role']), 'token'=>$token]);
+        });
     }
 
-    public function resetPassword(Request $request)
+    public function changePassword(Request $request, PasswordManagement $passwords)
     {
-        $data = $request->validate([
-            'username' => 'required|string|max:191',
-            'password' => 'required|min:6|confirmed',
-        ]);
-
-        $user = User::where('email', $data['username'])->first();
-
-        if (!$user) {
-            return response()->json(['message' => 'Username tidak ditemukan'], 404);
+        if (array_diff(array_keys($request->all()), ['current_password','password','password_confirmation'])) {
+            throw ValidationException::withMessages(['request' => 'Hanya field password akun sendiri yang diperbolehkan.']);
         }
-
-        $user->password = Hash::make($data['password']);
-        $user->tokens()->delete();
-        $user->save();
-        ActivityLog::record('Auth', 'reset-password', 'Password admin diperbarui dari form lupa password');
-
-        return response()->json(['message' => 'Password berhasil diperbarui']);
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'password' => PasswordPolicy::rules(),
+            'password_confirmation' => 'required|string',
+        ]);
+        try {
+            $passwords->replace($request->user()->id, $data['password'], $data['current_password']);
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Perubahan password gagal. Silakan coba kembali.'], 503);
+        }
+        return response()->json(['message' => 'Password berhasil diubah. Silakan login kembali.']);
     }
 
     public function logout(Request $request)
@@ -60,6 +57,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user()->only(['id','name','username','role']));
     }
 }

@@ -18,7 +18,7 @@ class ActivityLog extends Model
     {
         try {
             self::create([
-                'user_name' => 'admin',
+                'user_name' => request()->is('api/midtrans/notification') ? 'midtrans' : (auth()->user()?->username ?? 'system'),
                 'module' => $module,
                 'action' => $action,
                 'description' => $description,

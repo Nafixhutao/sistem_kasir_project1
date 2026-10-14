@@ -1,11 +1,12 @@
 import React, { Suspense, lazy } from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from './hooks/useAuth'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useAuth, AuthProvider } from './hooks/useAuth'
 import Layout from './components/Layout/Layout'
 
 const Login = lazy(() => import('./pages/Login'))
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const DataBarang = lazy(() => import('./pages/DataBarang'))
+const DataSupplier = lazy(() => import('./pages/DataSupplier'))
 const TransaksiPenjualan = lazy(() => import('./pages/TransaksiPenjualan'))
 const LaporanPenjualan = lazy(() => import('./pages/LaporanPenjualan'))
 const ReturSupplier = lazy(() => import('./pages/ReturSupplier'))
@@ -20,10 +21,17 @@ const RiwayatBrilink = lazy(() => import('./pages/RiwayatBrilink'))
 const PengaturanBiayaAdmin = lazy(() => import('./pages/PengaturanBiayaAdmin'))
 const PengeluaranToko = lazy(() => import('./pages/PengeluaranToko'))
 const Pengaturan = lazy(() => import('./pages/Pengaturan'))
+const ManajemenPengguna = lazy(() => import('./pages/ManajemenPengguna'))
+const ownerPaths = ['/dashboard','/barang','/data-supplier','/laporan-penjualan','/retur-supplier','/retur-barang-pelanggan','/pengeluaran-toko','/riwayat-brilink','/biaya-admin','/pengaturan','/riwayat-aktivitas','/manajemen-pengguna']
 
 function PrivateRoute({ children }) {
-  const { token } = useAuth()
-  return token ? children : <Navigate to="/login" />
+  const { token, user } = useAuth()
+  const { pathname } = useLocation()
+  if (!token) return <Navigate to="/login" replace />
+  if (!user) return <PageLoader />
+  if (!['kasir','admin'].includes(user.role)) return <Navigate to="/login" replace />
+  if ((user.role === 'admin' && !ownerPaths.includes(pathname)) || (user.role === 'kasir' && pathname === '/manajemen-pengguna')) return <Navigate to="/dashboard" replace />
+  return children
 }
 
 function PageLoader() {
@@ -32,13 +40,15 @@ function PageLoader() {
 
 export default function App() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <AuthProvider><Suspense fallback={<PageLoader />}>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route index element={<Navigate to="/dashboard" />} />
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="manajemen-pengguna" element={<ManajemenPengguna />} />
           <Route path="barang" element={<DataBarang />} />
+          <Route path="data-supplier" element={<DataSupplier />} />
           <Route path="transaksi-penjualan" element={<TransaksiPenjualan />} />
           <Route path="laporan-penjualan" element={<LaporanPenjualan />} />
           <Route path="retur-supplier" element={<ReturSupplier />} />
@@ -58,6 +68,6 @@ export default function App() {
         </Route>
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
-    </Suspense>
+    </Suspense></AuthProvider>
   )
 }

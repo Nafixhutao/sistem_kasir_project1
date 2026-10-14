@@ -12,8 +12,7 @@ class BiayaAdminController extends Controller
 {
     public function index()
     {
-        BiayaAdminBrilink::ensureDefaults();
-
+        // Viewing tariffs must not initialize or modify operational data.
         return response()->json([
             'layanan' => BiayaAdminBrilink::layanan(),
             'data' => BiayaAdminBrilink::query()

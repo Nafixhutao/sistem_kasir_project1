@@ -40,7 +40,7 @@ class EwalletController extends Controller
         $data['tanggal'] = now()->toDateString();
         $data = BrilinkFeeService::withNominalFee($data, 'ewallet', 'nominal');
         $data['status'] = 'sukses';
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = TransaksiEwallet::create($data);
         ActivityLog::record('E-Wallet', 'create', 'Mencatat transaksi e-wallet ' . $transaksi->kode_transaksi, $transaksi->toArray());

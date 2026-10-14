@@ -46,7 +46,7 @@ class PulsaController extends Controller
         $data['tanggal'] = Carbon::today();
         $data = BrilinkFeeService::withNasabahFee($data, 'pulsa_paket_data', 'harga');
         $adminFee = BrilinkFeeService::adminFeeFrom($data);
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = TransaksiPulsa::create($data);
         ActivityLog::record('Pulsa', 'create', 'Admin menambahkan transaksi BRILink Pulsa/Paket Data sebesar Rp' . number_format($harga, 0, ',', '.') . ' dengan biaya admin Rp' . number_format($adminFee, 0, ',', '.'), $transaksi->toArray());

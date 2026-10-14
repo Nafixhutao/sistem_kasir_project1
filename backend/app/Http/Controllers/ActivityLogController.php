@@ -15,6 +15,9 @@ class ActivityLogController extends Controller
         ]);
 
         $query = ActivityLog::query()->orderBy('created_at', 'desc');
+        if ($request->user()->role === 'admin') {
+            $query->select(['id','user_name','module','action','description','created_at','updated_at']);
+        }
 
         if (!empty($filters['module']) && $filters['module'] !== 'semua') {
             $query->where('module', $filters['module']);

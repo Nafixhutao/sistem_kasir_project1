@@ -11,6 +11,7 @@ import {
 } from '../utils/biayaAdminBrilink'
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
+import { useAuth } from '../hooks/useAuth'
 
 const layananIcons = {
   transfer: Landmark,
@@ -22,6 +23,8 @@ const layananIcons = {
 }
 
 export default function PengaturanBiayaAdmin() {
+  const { user } = useAuth()
+  const canManage = user?.role === 'admin'
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -49,6 +52,7 @@ export default function PengaturanBiayaAdmin() {
   }, [rows])
 
   const updateRange = (jenisTransaksi, jenisNasabah, rangeIndex, field, value) => {
+    if (!canManage) return
     const targetRows = rows.length ? rows : flattenGroups(groups)
     const nextRows = targetRows.map(row => ({ ...row }))
     const matching = sortBiayaAdminRanges(
@@ -73,6 +77,7 @@ export default function PengaturanBiayaAdmin() {
   }
 
   const saveSection = async (section) => {
+    if (!canManage) return
     try {
       const payload = {
         jenis_nasabah: section.jenisNasabah,
@@ -118,7 +123,7 @@ export default function PengaturanBiayaAdmin() {
         <div>
           <span>Pengaturan BRILink</span>
           <h1>Biaya Admin</h1>
-          <p>Atur range biaya admin per layanan BRILink, jenis nasabah, dan nominal transaksi.</p>
+          <p>{canManage ? 'Atur range biaya admin per layanan BRILink, jenis nasabah, dan nominal transaksi.' : 'Lihat tarif biaya admin yang ditetapkan Admin untuk pendataan transaksi BRILink.'}</p>
         </div>
       </div>
 
@@ -159,25 +164,25 @@ export default function PengaturanBiayaAdmin() {
                         <div key={rangeIndex} className="admin-range-row">
                           <label>
                             <span>Dari</span>
-                            <input type="number" value={range.nominal_min} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_min', e.target.value)} />
+                            <input type="number" readOnly={!canManage} value={range.nominal_min} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_min', e.target.value)} />
                           </label>
                           <label>
                             <span>Sampai</span>
-                            <input type="number" value={range.nominal_max ?? ''} placeholder="Ke atas" onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_max', e.target.value)} />
+                            <input type="number" readOnly={!canManage} value={range.nominal_max ?? ''} placeholder="Ke atas" onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_max', e.target.value)} />
                           </label>
                           <label>
                             <span>Admin</span>
-                            <input type="number" value={range.biaya_admin} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'biaya_admin', e.target.value)} />
+                            <input type="number" readOnly={!canManage} value={range.biaya_admin} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'biaya_admin', e.target.value)} />
                           </label>
                           <p>{formatRangeText(range)} = {formatRupiah(range.biaya_admin)}</p>
                         </div>
                       ))}
                     </div>
 
-                    <button onClick={() => saveSection(section)} className="admin-save-button">
+                    {canManage && <button onClick={() => saveSection(section)} className="admin-save-button">
                       <Save size={17} />
                       <span>Simpan {section.title}</span>
-                    </button>
+                    </button>}
                   </div>
                 ))}
               </div>

@@ -7,10 +7,13 @@ import Modal from '../components/Common/Modal'
 import toast from 'react-hot-toast'
 import { BrowserMultiFormatReader } from '@zxing/browser'
 
-const emptyForm = { kode_barang: '', nama_barang: '', kategori: '', stok: '', harga_beli: '', harga_jual: '' }
+const emptyForm = { kode_barang: '', nama_barang: '', kategori: '', stok: '', harga_beli: '', harga_jual: '', supplier_id: '' }
 
 export default function DataBarang() {
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [barang, setBarang] = useState([])
+  const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -28,7 +31,10 @@ export default function DataBarang() {
   const importInputRef = useRef(null)
   const scannerControlsRef = useRef(null)
 
-  useEffect(() => { fetchBarang() }, [])
+  useEffect(() => {
+    fetchBarang()
+    api.get('/suppliers').then(res => setSuppliers(res.data)).catch(e => toast.error(getApiErrorMessage(e, 'Gagal memuat pilihan supplier')))
+  }, [])
 
   useEffect(() => {
     if (modalOpen && inputMode === 'otomatis' && !editData) startScanner()
@@ -53,6 +59,7 @@ export default function DataBarang() {
       stok: Number(form.stok),
       harga_beli: Number(form.harga_beli),
       harga_jual: Number(form.harga_jual),
+      supplier_id: form.supplier_id === '' || form.supplier_id == null ? null : Number(form.supplier_id),
     }
 
     try {
@@ -166,7 +173,7 @@ export default function DataBarang() {
   const openEdit = (item) => {
     setEditData(item)
     setInputMode('manual')
-    setForm(item)
+    setForm({ ...item, supplier_id: item.supplier_id ?? '' })
     setModalOpen(true)
   }
 
@@ -282,7 +289,7 @@ export default function DataBarang() {
           <h1>Data Barang</h1>
           <p>Kelola stok, kategori, harga beli, dan harga jual barang Sultan Cell.</p>
         </div>
-        <div className="sales-heading-actions">
+        {canWrite && <div className="sales-heading-actions">
           <input ref={importInputRef} type="file" accept=".csv,.txt,.xlsx" onChange={handleImportFile} hidden />
           <button type="button" onClick={() => importInputRef.current?.click()} className="scan-open-button secondary">
             <Upload size={19} />
@@ -292,7 +299,7 @@ export default function DataBarang() {
             <Plus size={19} />
             <span>Tambah Barang</span>
           </button>
-        </div>
+        </div>}
       </div>
 
       <div className="inventory-summary">
@@ -344,6 +351,7 @@ export default function DataBarang() {
                 <th>Kode</th>
                 <th>Nama Barang</th>
                 <th>Kategori</th>
+                <th>Supplier</th>
                 <th>Stok</th>
                 <th className="money-header">Harga Beli</th>
                 <th className="money-header">Harga Jual</th>
@@ -364,6 +372,7 @@ export default function DataBarang() {
                     </div>
                   </td>
                   <td><span className="category-pill">{item.kategori}</span></td>
+                  <td>{item.supplier?.nama_supplier || '-'}</td>
                   <td>
                     <div className="stock-cell">
                       <span className={`stock-pill ${Number(item.stok) < 5 ? 'low' : 'safe'}`}>{item.stok} pcs</span>
@@ -373,14 +382,14 @@ export default function DataBarang() {
                   <td className="money-cell">{formatRupiah(item.harga_beli)}</td>
                   <td className="money-cell strong">{formatRupiah(item.harga_jual)}</td>
                   <td>
-                    <div className="table-actions">
+                    {canWrite && <div className="table-actions">
                       <button onClick={() => openEdit(item)} className="icon-action edit" aria-label={`Edit ${item.nama_barang}`}>
                         <Edit3 size={17} />
                       </button>
                       <button onClick={() => setDeleteTarget(item)} className="icon-action delete" aria-label={`Hapus ${item.nama_barang}`}>
                         <Trash2 size={17} />
                       </button>
-                    </div>
+                    </div>}
                   </td>
                 </tr>
               ))}
@@ -480,6 +489,13 @@ export default function DataBarang() {
 
           <div className="form-grid three">
             <label className="field-group">
+              <span>Supplier Utama (opsional)</span>
+              <select value={form.supplier_id} onChange={e => setForm({ ...form, supplier_id: e.target.value })}>
+                <option value="">Belum ditentukan</option>
+                {suppliers.map(supplier => <option key={supplier.id} value={supplier.id}>{supplier.nama_supplier}</option>)}
+              </select>
+            </label>
+            <label className="field-group">
               <span>Stok</span>
               <input type="number" value={form.stok} onChange={e => setForm({ ...form, stok: e.target.value })} required />
             </label>
@@ -518,3 +534,4 @@ export default function DataBarang() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

@@ -37,7 +37,7 @@ class PengeluaranTokoController extends Controller
             'keterangan' => 'nullable|string',
         ]);
 
-        $pengeluaran = PengeluaranToko::create(array_merge($data, ['kasir' => 'admin']));
+        $pengeluaran = PengeluaranToko::create(array_merge($data, ['kasir' => $request->user()->username]));
         ActivityLog::record('Pengeluaran', 'create', 'Mencatat pengeluaran ' . $pengeluaran->nama_pengeluaran, $pengeluaran->toArray());
 
         return response()->json($pengeluaran, 201);

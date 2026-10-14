@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ReturPelanggan extends Model
 {
     protected $table = 'retur_pelanggan';
+    protected $hidden = ['request_hash'];
 
     protected $fillable = [
         'nomor_retur',

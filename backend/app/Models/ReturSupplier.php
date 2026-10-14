@@ -10,6 +10,7 @@ class ReturSupplier extends Model
     use HasFactory;
 
     protected $table = 'retur_supplier';
+    protected $hidden = ['request_hash'];
 
     protected $fillable = [
         'nomor_retur',

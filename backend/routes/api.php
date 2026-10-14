@@ -21,24 +21,29 @@ use App\Http\Controllers\ReturSupplierController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\NotifikasiController;
 
-foreach (['id', 'barang', 'transfer', 'tarik_tunai', 'setor_tunai', 'tagihan', 'pulsa', 'ewallet', 'pengeluaran_toko', 'retur_supplier'] as $parameter) {
+foreach (['id', 'barang', 'supplier', 'transfer', 'tarik_tunai', 'setor_tunai', 'tagihan', 'pulsa', 'ewallet', 'pengeluaran_toko', 'retur_supplier'] as $parameter) {
     Route::pattern($parameter, '[0-9]+');
 }
 
 // Public routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/midtrans/notification', [PenjualanController::class, 'qrisWebhook']);
 
 // Protected routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', \App\Http\Middleware\AccountAccess::class])->group(function () {
+    Route::get('/users', [\App\Http\Controllers\UserManagementController::class, 'index']);
+    Route::post('/users', [\App\Http\Controllers\UserManagementController::class, 'store']);
+    Route::patch('/users/{id}/status', [\App\Http\Controllers\UserManagementController::class, 'status']);
+    Route::post('/users/{id}/reset-password', [\App\Http\Controllers\UserManagementController::class, 'resetPassword']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
     Route::get('/me', [AuthController::class, 'me']);
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
     // Barang
+    Route::apiResource('suppliers', \App\Http\Controllers\SupplierController::class);
     Route::apiResource('barang', BarangController::class);
     Route::post('/barang/import', [BarangController::class, 'import']);
     Route::get('/barang-search', [BarangController::class, 'search']);

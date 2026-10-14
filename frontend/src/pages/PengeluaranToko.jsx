@@ -14,6 +14,8 @@ const toInputDate = (date) => {
 }
 
 export default function PengeluaranToko() {
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [data, setData] = useState([])
   const [startDate, setStartDate] = useState(toInputDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)))
   const [endDate, setEndDate] = useState(toInputDate(new Date()))
@@ -83,7 +85,7 @@ export default function PengeluaranToko() {
         <div className="brilink-summary-card"><div className="summary-icon blue"><WalletCards size={22} /></div><span>Jumlah Catatan</span><strong>{data.length}</strong></div>
       </div>
 
-      <section className="brilink-form-card">
+      {canWrite && <section className="brilink-form-card">
         <div className="brilink-section-title"><WalletCards size={20} /><div><h2>Form Pengeluaran</h2><p>Data ini disimpan sebagai riwayat biaya operasional toko.</p></div></div>
         <form onSubmit={submit} className="brilink-form-grid">
           <label className="field-group"><span>Tanggal</span><input type="date" value={form.tanggal} onChange={e => setForm({ ...form, tanggal: e.target.value })} /></label>
@@ -93,7 +95,7 @@ export default function PengeluaranToko() {
           <label className="field-group full"><span>Keterangan</span><textarea value={form.keterangan} onChange={e => setForm({ ...form, keterangan: e.target.value })} /></label>
           <div className="form-actions full"><button disabled={loading} className="primary-action-button">{loading ? 'Menyimpan...' : 'Simpan Pengeluaran'}</button></div>
         </form>
-      </section>
+      </section>}
 
       <section className="brilink-filter-panel">
         <label className="field-group"><span>Tanggal Mulai</span><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></label>
@@ -113,7 +115,7 @@ export default function PengeluaranToko() {
                 <td>{item.nama_pengeluaran}</td>
                 <td className="money-cell strong">{formatRupiah(item.nominal)}</td>
                 <td>{item.keterangan || '-'}</td>
-                <td><button type="button" className="table-action-button danger" onClick={() => setDeleteTarget(item)}><Trash2 size={15} />Hapus</button></td>
+                <td>{canWrite && <button type="button" className="table-action-button danger" onClick={() => setDeleteTarget(item)}><Trash2 size={15} />Hapus</button>}</td>
               </tr>
             ))}</tbody>
           </table>
@@ -138,3 +140,4 @@ export default function PengeluaranToko() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

@@ -175,7 +175,7 @@ button { cursor: pointer; }
 .login-page {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(560px, 0.98fr) minmax(520px, 1.02fr);
+  grid-template-columns: minmax(0, 0.98fr) minmax(0, 1.02fr);
   background: #f8fbff;
   color: #fff;
 }
@@ -538,6 +538,7 @@ button { cursor: pointer; }
 .field-group {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .field-group span {
@@ -577,6 +578,8 @@ button { cursor: pointer; }
 
 .field-group input {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 54px;
   border: 1px solid #cbd5e1;
   border-radius: 13px;
@@ -1738,6 +1741,42 @@ button { cursor: pointer; }
   background: #f8fbff;
 }
 
+/* Supplier uses a different set of columns from the stock table. Keep its
+   descriptive fields readable while keeping quantity and actions aligned. */
+.supplier-table {
+  min-width: 980px;
+  table-layout: fixed;
+}
+
+.supplier-name-col { width: 19%; }
+.supplier-phone-col { width: 16%; }
+.supplier-address-col { width: 26%; }
+.supplier-note-col { width: 18%; }
+.supplier-count-col { width: 11%; }
+.supplier-action-col { width: 10%; }
+
+.supplier-table th:nth-child(4),
+.supplier-table td:nth-child(4) {
+  text-align: left;
+}
+
+.supplier-table th:nth-child(5),
+.supplier-table td:nth-child(5),
+.supplier-table th:nth-child(6),
+.supplier-table td:nth-child(6) {
+  text-align: center;
+}
+
+.supplier-table td:nth-child(2),
+.supplier-table td:nth-child(5) {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.supplier-table .table-actions {
+  justify-content: center;
+}
+
 .item-code {
   display: inline-flex;
   align-items: center;
@@ -2018,6 +2057,8 @@ button { cursor: pointer; }
 
 .field-group select {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 48px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
@@ -2036,6 +2077,7 @@ button { cursor: pointer; }
 .form-actions {
   padding-top: 8px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 10px;
 }
@@ -2108,12 +2150,15 @@ button { cursor: pointer; }
 }
 
 .modal-header h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: #0f172a;
   font-size: 20px;
   font-weight: 880;
 }
 
 .modal-header button {
+  flex: 0 0 38px;
   width: 38px;
   height: 38px;
   border: 0;
@@ -2406,6 +2451,7 @@ button { cursor: pointer; }
 .sales-heading,
 .report-heading {
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .scan-open-button {
@@ -3441,6 +3487,7 @@ button { cursor: pointer; }
 
 .report-heading-actions {
   flex: 0 0 auto;
+  max-width: 100%;
   display: grid;
   justify-items: end;
   gap: 10px;
@@ -3449,6 +3496,12 @@ button { cursor: pointer; }
 .report-action-buttons {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.user-management-actions {
+  display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -3496,7 +3549,7 @@ button { cursor: pointer; }
 .report-filter-panel {
   padding: 22px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 18px;
 }
 
@@ -3977,19 +4030,19 @@ button { cursor: pointer; }
 .brilink-filter-panel {
   padding: 18px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(180px, 240px));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   gap: 14px;
 }
 
 .riwayat-filter-panel {
-  grid-template-columns: minmax(170px, 240px) minmax(170px, 240px) minmax(170px, 240px) minmax(210px, 280px) auto;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   align-items: end;
   column-gap: 14px;
   row-gap: 12px;
 }
 
 .retur-supplier-filter-panel {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   align-items: end;
   gap: 16px;
 }
@@ -4012,7 +4065,7 @@ button { cursor: pointer; }
 }
 
 .return-history-filter-panel {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   align-items: end;
   gap: 16px;
 }
@@ -4051,7 +4104,7 @@ button { cursor: pointer; }
 }
 
 .activity-filter-panel {
-  grid-template-columns: minmax(260px, 420px) minmax(170px, 240px) auto;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
   align-items: end;
   column-gap: 14px;
   row-gap: 12px;

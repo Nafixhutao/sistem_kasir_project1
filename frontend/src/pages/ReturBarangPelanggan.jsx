@@ -5,6 +5,7 @@ import Modal from '../components/Common/Modal'
 import CustomerReturnModal from '../components/Sales/CustomerReturnModal'
 import api, { getApiErrorMessage } from '../services/api'
 import { formatRupiah } from '../utils/formatRupiah'
+import { useBusinessRequest } from '../hooks/useBusinessRequest'
 
 const toInputDate = (date) => {
   const year = date.getFullYear()
@@ -37,6 +38,9 @@ const formatPenyelesaian = (value) => {
 }
 
 export default function ReturBarangPelanggan() {
+  const businessRequest = useBusinessRequest()
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [transactions, setTransactions] = useState([])
   const [transactionLoading, setTransactionLoading] = useState(false)
   const [transactionError, setTransactionError] = useState('')
@@ -59,7 +63,7 @@ export default function ReturBarangPelanggan() {
   })
 
   useEffect(() => {
-    fetchTransactions()
+    if (canWrite) fetchTransactions()
     fetchAllReturnRecords()
     fetchReturnHistory()
   }, [])
@@ -172,9 +176,11 @@ export default function ReturBarangPelanggan() {
 
   const submitCustomerReturn = async (payload) => {
     if (!returnTransaction) return
+    if (businessRequest.isBusy()) return
     setSavingReturn(true)
     try {
-      await api.post(`/penjualan/${returnTransaction.id}/retur`, payload)
+      const result = await businessRequest.submit(`/penjualan/${returnTransaction.id}/retur`, payload)
+      if (!result) return
       toast.success('Retur berhasil dicatat dan stok diperbarui')
       setReturnTransaction(null)
       await Promise.all([fetchTransactions(), fetchAllReturnRecords(), fetchReturnHistory()])
@@ -198,6 +204,7 @@ export default function ReturBarangPelanggan() {
         </div>
       </div>
 
+      {canWrite && <>
       <section className="brilink-filter-panel retur-supplier-filter-panel">
         <label className="field-group">
           <span>Cari Transaksi / Barang</span>
@@ -296,6 +303,7 @@ export default function ReturBarangPelanggan() {
         </div>
       </section>
 
+      </>}
       <section className="report-filter-panel return-history-filter-panel">
         <label className="field-group">
           <span>Tanggal Mulai</span>
@@ -414,3 +422,4 @@ export default function ReturBarangPelanggan() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

@@ -15,6 +15,8 @@ const toInputDate = (date) => {
 }
 
 export default function LaporanPenjualan() {
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [data, setData] = useState({ transaksi: [], total_penjualan: 0, total_transaksi: 0, chart_data: [] })
   const [customerReturns, setCustomerReturns] = useState([])
   const [startDate, setStartDate] = useState(toInputDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)))
@@ -305,10 +307,10 @@ export default function LaporanPenjualan() {
               <FileSpreadsheet size={17} />
               <span>Excel</span>
             </button>
-            <button type="button" onClick={resetReport} disabled={resetting || loading} className="report-action-button reset">
+            {canWrite && <button type="button" onClick={resetReport} disabled={resetting || loading} className="report-action-button reset">
               <RotateCcw size={17} />
               <span>{resetting ? 'Reset...' : 'Reset'}</span>
-            </button>
+            </button>}
           </div>
         </div>
       </div>
@@ -405,7 +407,7 @@ export default function LaporanPenjualan() {
                   <td>
                     <div className="table-actions">
                       <button type="button" className="table-action-button" onClick={() => setSelectedTransaction(transaction)}><Eye size={15} />Detail</button>
-                      <button type="button" className="table-action-button danger" onClick={() => openCancelDialog(transaction)} disabled={transaction.status === 'batal'}><XCircle size={15} />Batal</button>
+                      {canWrite && <button type="button" className="table-action-button danger" onClick={() => openCancelDialog(transaction)} disabled={transaction.status === 'batal'}><XCircle size={15} />Batal</button>}
                     </div>
                   </td>
                 </tr>
@@ -540,3 +542,4 @@ export default function LaporanPenjualan() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

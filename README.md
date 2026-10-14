@@ -189,7 +189,7 @@ Perintah ini otomatis:
 
 - Membuild image (frontend React + backend Laravel + Apache)
 - Menjalankan MySQL dengan database `sistem_project1`
-- Menjalankan migrasi dan seeder (akun `admin` / `admin123`)
+- Menjalankan migrasi dan seeder
 - Menjalankan Cloudflared tunnel
 
 Buka aplikasi:
@@ -206,37 +206,20 @@ Tanpa `TUNNEL_TOKEN` (default), cloudflared membuat Quick Tunnel dengan URL acak
 docker compose logs -f cloudflared
 ```
 
-Cari baris seperti ini di log, lalu buka URL tersebut:
+Cari URL `trycloudflare.com` pada log, lalu buka URL tersebut.
 
-```text
-https://xxxx-xxxx.trycloudflare.com
-```
-
-Untuk tunnel permanen, buat tunnel di dashboard Cloudflare, lalu set di file `.env`:
-
-```text
-TUNNEL_TOKEN=eyJhIjoi...
-```
-
-Lalu restart cloudflared:
-
-```bash
-docker compose up -d cloudflared
-```
+Untuk tunnel permanen, buat tunnel di dashboard Cloudflare, lalu set `TUNNEL_TOKEN` di `.env` dan restart container `cloudflared`.
 
 ### 4. Perintah Lain yang Sering Dipakai
 
 ```bash
-docker compose ps          # lihat status container
-docker compose logs -f app # lihat log aplikasi
-docker compose down        # stop semua container
-docker compose down -v     # stop + hapus volume data (HATI-HATI: db terhapus)
+docker compose ps
+docker compose logs -f app
+docker compose down
 docker compose exec db mysql -u sultan -p sistem_project1
 ```
 
-### 5. Kustomisasi
-
-Semua pengaturan (port, database, tunnel) bisa diubah di file `.env`. Data MySQL disimpan dalam volume Docker `db_data`, dan file storage Laravel dalam volume `app_storage`, sehingga tetap aman saat container di-restart atau dibuild ulang.
+Data MySQL disimpan dalam volume Docker `db_data`, dan file storage Laravel dalam volume `app_storage`.
 
 ## Akun Demo
 

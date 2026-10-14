@@ -16,7 +16,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
     ];
 
     private const VARCHAR_TARGETS = [
-        'users' => ['name' => 100, 'email' => 191, 'password' => 255, 'remember_token' => 100],
+        'users' => ['name' => 50, 'username' => 50, 'password' => 255, 'remember_token' => 100],
         'barang' => ['kode_barang' => 50, 'nama_barang' => 150, 'kategori' => 100],
         'transaksi_penjualan' => ['kode_transaksi' => 50, 'kasir' => 100],
         'detail_penjualan' => ['kode_barang' => 50, 'nama_barang' => 150],
@@ -77,7 +77,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
     ];
 
     private const REQUIRED_INDEXES = [
-        'users.users_email_unique' => [['email'], true],
+        'users.users_username_unique' => [['username'], true],
         'barang.barang_kode_barang_unique' => [['kode_barang'], true],
         'transaksi_penjualan.transaksi_penjualan_kode_transaksi_unique' => [['kode_transaksi'], true],
         'pembayaran_qris.pembayaran_qris_order_id_unique' => [['order_id'], true],
@@ -164,13 +164,14 @@ class DatabaseSchemaNormalizationTest extends TestCase
             'retur_pelanggan_transaksi_penjualan_id_foreign' => ['retur_pelanggan', 'transaksi_penjualan_id', 'transaksi_penjualan', 'SET NULL', 'YES'],
             'retur_supplier_barang_id_foreign' => ['retur_supplier', 'barang_id', 'barang', 'NO ACTION', 'NO'],
             'notifikasi_user_id_foreign' => ['notifikasi', 'user_id', 'users', 'CASCADE', 'NO'],
+            'barang_supplier_id_foreign' => ['barang', 'supplier_id', 'suppliers', 'RESTRICT', 'YES'],
         ];
 
         $actualForeignKeyCount = DB::table('information_schema.KEY_COLUMN_USAGE')
             ->where('CONSTRAINT_SCHEMA', DB::connection()->getDatabaseName())
             ->whereNotNull('REFERENCED_TABLE_NAME')
             ->count();
-        $this->assertSame(11, $actualForeignKeyCount);
+        $this->assertSame(12, $actualForeignKeyCount);
 
         foreach ($expected as $name => [$table, $column, $referencedTable, $deleteRule, $nullable]) {
             $foreignKey = DB::selectOne(
@@ -223,8 +224,11 @@ class DatabaseSchemaNormalizationTest extends TestCase
         $this->assertSame(3, $actualTypes['json|json'] ?? 0);
         $this->assertSame(11, $actualTypes['text|text'] ?? 0);
         $this->assertSame(10, $actualTypes['date|date'] ?? 0);
-        $this->assertSame(43, $actualTypes['timestamp|timestamp'] ?? 0);
-        $this->assertSame(4, $actualTypes['tinyint|tinyint(1)'] ?? 0);
+        $usernameComplete = DB::table('migrations')->where('migration', '2026_10_08_000001_remove_legacy_email_from_users')->exists();
+        // The only removed non-varchar column is legacy users.email_verified_at.
+        $this->assertSame($usernameComplete ? 42 : 43, $actualTypes['timestamp|timestamp'] ?? 0);
+        $roleComplete = \Illuminate\Support\Facades\Schema::hasColumn('users','is_active');
+        $this->assertSame($roleComplete ? 5 : 4, $actualTypes['tinyint|tinyint(1)'] ?? 0);
 
         $orphanChecks = [
             ['detail_penjualan', 'transaksi_penjualan_id', 'transaksi_penjualan', false],

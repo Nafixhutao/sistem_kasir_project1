@@ -1,29 +1,26 @@
 import React, { useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { LogIn, Eye, EyeOff, ShieldCheck, User, LockKeyhole, ReceiptText, WalletCards, Package, BarChart3 } from 'lucide-react'
 import sultanCellLogoRound from '../assets/sultan-cell-logo-round.png'
-import api, { getApiErrorMessage } from '../services/api'
 
 export default function Login() {
+  const location = useLocation()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState('')
-  const [messageType, setMessageType] = useState('error')
+  const [error, setError] = useState(location.state?.message || '')
+  const [messageType, setMessageType] = useState(location.state?.message ? 'success' : 'error')
   const [usernameError, setUsernameError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [forgotAttempts, setForgotAttempts] = useState(0)
-  const [showResetPassword, setShowResetPassword] = useState(false)
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [resetLoading, setResetLoading] = useState(false)
   const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setMessageType('error')
     setUsernameError('')
     setPasswordError('')
 
@@ -41,17 +38,7 @@ export default function Login() {
 
     const result = await login(username, password)
     if (!result.success) {
-      const nextAttempts = forgotAttempts + 1
-      setForgotAttempts(nextAttempts)
-      if (nextAttempts >= 3) {
-        setShowResetPassword(true)
-        setMessageType('error')
-        setError('Sudah 3 kali gagal. Silakan buat password baru.')
-      } else {
-        const warning = `${result.message}. Percobaan ${nextAttempts}/3 sebelum reset password.`
-        setUsernameError('Periksa kembali username.')
-        setPasswordError(warning)
-      }
+      setError(result.message)
     }
     setLoading(false)
   }
@@ -59,61 +46,8 @@ export default function Login() {
   const handleForgotPassword = () => {
     setUsernameError('')
     setPasswordError('')
-    if (!username.trim()) {
-      setUsernameError('Isi username dulu sebelum reset password.')
-      return
-    }
-
-    const nextAttempts = forgotAttempts + 1
-    setForgotAttempts(nextAttempts)
-    if (nextAttempts >= 3) {
-      setShowResetPassword(true)
-      setMessageType('error')
-      setError('Silakan buat password baru untuk akun ini.')
-    } else {
-      setMessageType('error')
-      setError(`Permintaan lupa password tercatat ${nextAttempts}/3.`)
-    }
-  }
-
-  const handleResetPassword = async (e) => {
-    e.preventDefault()
-    if (!username.trim()) {
-      setMessageType('error')
-      return setError('Username wajib diisi.')
-    }
-    if (newPassword.length < 6) {
-      setMessageType('error')
-      return setError('Password baru minimal 6 karakter.')
-    }
-    if (newPassword !== confirmPassword) {
-      setMessageType('error')
-      return setError('Konfirmasi password belum sama.')
-    }
-
-    setResetLoading(true)
-    setError('')
-    setUsernameError('')
-    setPasswordError('')
-    try {
-      await api.post('/reset-password', {
-        username,
-        password: newPassword,
-        password_confirmation: confirmPassword,
-      })
-      setPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-      setForgotAttempts(0)
-      setShowResetPassword(false)
-      setMessageType('success')
-      setError('Password berhasil diperbarui. Silakan login dengan password baru.')
-    } catch (e) {
-      setMessageType('error')
-      setError(getApiErrorMessage(e, 'Gagal memperbarui password.'))
-    } finally {
-      setResetLoading(false)
-    }
+    setMessageType('error')
+    setError('Hubungi pengelola sistem untuk reset password secara lokal.')
   }
 
   return (
@@ -175,42 +109,17 @@ export default function Login() {
             <p>Silakan masuk untuk membuka dashboard operasional.</p>
           </div>
 
-          <form onSubmit={showResetPassword ? handleResetPassword : handleSubmit} className="login-form" noValidate>
+          <form onSubmit={handleSubmit} className="login-form" noValidate>
             {error && <div className={`form-error animate-fadeIn ${messageType === 'success' ? 'success' : ''}`}>{error}</div>}
             <label className="field-group">
               <span>Username</span>
               <div className={`input-with-icon ${usernameError ? 'has-error' : ''}`}>
                 <User size={20} />
-                <input type="text" maxLength={191} value={username} onChange={e => { setUsername(e.target.value); setUsernameError('') }} placeholder="Masukkan username" required />
+                <input type="text" name="username" maxLength={50} value={username} onChange={e => { setUsername(e.target.value); setUsernameError('') }} placeholder="Masukkan username" required />
               </div>
               {usernameError && <p className="field-warning animate-fadeIn">{usernameError}</p>}
             </label>
 
-            {showResetPassword ? (
-              <>
-                <label className="field-group">
-                  <span>Password Baru</span>
-                  <div className={`input-with-icon ${error ? 'has-error' : ''}`}>
-                    <LockKeyhole size={19} />
-                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minimal 6 karakter" required />
-                  </div>
-                </label>
-                <label className="field-group">
-                  <span>Konfirmasi Password</span>
-                  <div className={`input-with-icon ${error ? 'has-error' : ''}`}>
-                    <LockKeyhole size={19} />
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Ulangi password baru" required />
-                  </div>
-                </label>
-                <button type="submit" disabled={resetLoading} className="primary-login-button">
-                  <ShieldCheck size={19} />
-                  {resetLoading ? 'Memperbarui...' : 'Perbarui Password'}
-                </button>
-                <button type="button" className="reset-cancel-button" onClick={() => { setShowResetPassword(false); setForgotAttempts(0); setError('') }}>
-                  Kembali ke login
-                </button>
-              </>
-            ) : (
               <>
                 <label className="field-group">
                   <span>Password</span>
@@ -235,7 +144,6 @@ export default function Login() {
                   {loading ? 'Memproses...' : 'Masuk'}
                 </button>
               </>
-            )}
             <div className="login-divider"><span>atau</span></div>
             <div className="login-admin-note">
               <ShieldCheck size={18} />

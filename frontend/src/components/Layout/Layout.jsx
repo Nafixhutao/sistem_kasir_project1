@@ -18,7 +18,7 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onLogout={logout} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} onLogout={logout} role={user?.role} />
       <div className="app-content">
         <Header user={user} />
         <main className="app-main">

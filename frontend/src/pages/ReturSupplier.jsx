@@ -3,6 +3,7 @@ import { ClipboardList, Eye, FileSpreadsheet, PackageCheck, Printer, RotateCcw, 
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
 import api, { getApiErrorMessage } from '../services/api'
+import { useBusinessRequest } from '../hooks/useBusinessRequest'
 
 const toInputDate = (date) => {
   const year = date.getFullYear()
@@ -38,6 +39,9 @@ const statusClasses = {
 const finalReturStatuses = ['diterima', 'ditolak']
 
 export default function ReturSupplier() {
+  const businessRequest = useBusinessRequest()
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [data, setData] = useState([])
   const [barang, setBarang] = useState([])
   const [form, setForm] = useState(emptyForm)
@@ -98,12 +102,14 @@ export default function ReturSupplier() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (businessRequest.isBusy()) return
     setLoading(true)
     try {
-      await api.post('/retur-supplier', {
+      const result = await businessRequest.submit('/retur-supplier', {
         ...form,
         jumlah_retur: Number(form.jumlah_retur),
       })
+      if (!result) return
       toast.success('Retur supplier berhasil dibuat')
       setShowForm(false)
       setForm(emptyForm)
@@ -255,7 +261,7 @@ export default function ReturSupplier() {
             <div className="report-action-buttons no-print">
               <button type="button" onClick={printReport} className="report-action-button print"><Printer size={17} />PDF / Print</button>
               <button type="button" onClick={exportExcel} className="report-action-button excel"><FileSpreadsheet size={17} />Excel</button>
-              <button type="button" onClick={() => setShowForm(!showForm)} className="report-action-button primary"><RotateCcw size={17} />Retur Baru</button>
+              {canWrite && <button type="button" onClick={() => setShowForm(!showForm)} className="report-action-button primary"><RotateCcw size={17} />Retur Baru</button>}
             </div>
           </div>
         </div>
@@ -276,7 +282,7 @@ export default function ReturSupplier() {
           <div className="brilink-summary-card"><div className="summary-icon red"><Undo2 size={22} /></div><span>Total Barang Retur</span><strong>{totalJumlah} pcs</strong></div>
         </div>
 
-        {showForm && (
+        {canWrite && showForm && (
           <section className="brilink-form-card no-print">
             <div className="brilink-section-title"><RotateCcw size={20} /><div><h2>Form Retur Supplier</h2><p>Status awal selalu diproses. Stok baru dikurangi setelah status diubah menjadi diterima.</p></div></div>
             <form onSubmit={handleSubmit} className="brilink-form-grid">
@@ -305,7 +311,7 @@ export default function ReturSupplier() {
                   <td><div className="person-cell"><strong>{item.nama_barang}</strong><span>{item.kode_barang}</span></div></td>
                   <td>{item.jumlah_retur} pcs</td>
                   <td>
-                    {isFinalRetur(item.status_retur) ? (
+                    {!canWrite || isFinalRetur(item.status_retur) ? (
                       <div className="retur-status-final">
                         <span className={`status-pill ${statusClasses[item.status_retur] || 'pending'}`}>{statusLabels[item.status_retur] || item.status_retur}</span>
                         <span className="final-badge">Final</span>
@@ -321,7 +327,7 @@ export default function ReturSupplier() {
                   <td>{item.keterangan || item.alasan_retur}</td>
                   <td className="action-cell no-print">
                     <button type="button" onClick={() => setSelectedRetur(item)} className="small-action-button view"><Eye size={16} />Detail</button>
-                    <button type="button" onClick={() => requestDeleteRetur(item)} className="small-action-button danger"><Trash2 size={16} />Hapus</button>
+                    {canWrite && <button type="button" onClick={() => requestDeleteRetur(item)} className="small-action-button danger"><Trash2 size={16} />Hapus</button>}
                   </td>
                 </tr>
               ))}</tbody>
@@ -371,3 +377,4 @@ export default function ReturSupplier() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

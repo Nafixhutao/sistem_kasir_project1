@@ -12,6 +12,11 @@ export const getApiErrorMessage = (error, fallback = 'Terjadi kesalahan. Coba la
     return 'Tidak bisa terhubung ke backend. Pastikan server Laravel sedang berjalan.'
   }
 
+  if (error.response.status === 429) {
+    const seconds = error.response.headers?.['retry-after'] || 60
+    return `Terlalu banyak percobaan. Coba kembali dalam ${seconds} detik.`
+  }
+
   const data = error.response.data || {}
   const firstError = data.errors ? Object.values(data.errors).flat()[0] : null
   return firstError || data.message || fallback
@@ -27,7 +32,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const requestUrl = error.config?.url || ''
-    const isAuthRequest = requestUrl.includes('/login') || requestUrl.includes('/reset-password')
+    const isAuthRequest = requestUrl.includes('/login')
     if (error.response && error.response.status === 401 && !isAuthRequest) {
       localStorage.removeItem('token')
       window.dispatchEvent(new Event('auth-token-changed'))

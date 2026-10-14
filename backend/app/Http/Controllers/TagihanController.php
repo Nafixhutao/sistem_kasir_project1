@@ -44,7 +44,7 @@ class TagihanController extends Controller
         $data['tanggal'] = Carbon::today();
         $data = BrilinkFeeService::withNasabahFee($data, 'tagihan', 'jumlah_tagihan');
         $adminFee = BrilinkFeeService::adminFeeFrom($data);
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = PembayaranTagihan::create($data);
         ActivityLog::record('Pembayaran Tagihan', 'create', 'Admin menambahkan transaksi BRILink Pembayaran Tagihan sebesar Rp' . number_format($jumlahTagihan, 0, ',', '.') . ' dengan biaya admin Rp' . number_format($adminFee, 0, ',', '.'), $transaksi->toArray());

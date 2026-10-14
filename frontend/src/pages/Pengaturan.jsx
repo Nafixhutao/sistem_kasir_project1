@@ -3,8 +3,11 @@ import { Activity, DatabaseBackup, Download, Search, Settings, Upload } from 'lu
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
+import ChangePasswordForm from '../components/Auth/ChangePasswordForm'
 
 export default function Pengaturan() {
+  const { user } = useAuth()
+  const canWrite = user?.role === 'kasir'
   const [activeTab, setActiveTab] = useState('aktivitas')
   const [activityData, setActivityData] = useState([])
   const [module, setModule] = useState('semua')
@@ -90,8 +93,11 @@ export default function Pengaturan() {
         <button type="button" className={activeTab === 'aktivitas' ? 'active' : ''} onClick={() => setActiveTab('aktivitas')}>
           <Activity size={18} /> Riwayat Aktivitas
         </button>
-        <button type="button" className={activeTab === 'backup' ? 'active' : ''} onClick={() => setActiveTab('backup')}>
+        {canWrite && <button type="button" className={activeTab === 'backup' ? 'active' : ''} onClick={() => setActiveTab('backup')}>
           <DatabaseBackup size={18} /> Backup Data
+        </button>}
+        <button type="button" className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>
+          <Settings size={18} /> Ubah Password
         </button>
       </div>
 
@@ -121,7 +127,7 @@ export default function Pengaturan() {
             </div>
           </section>
         </>
-      ) : (
+      ) : activeTab === 'password' ? <ChangePasswordForm /> : (
         <div className="settings-backup-grid">
           <section className="brilink-form-card settings-backup-card">
             <div className="brilink-section-title"><DatabaseBackup size={22} /><div><h2>Backup JSON</h2><p>Simpan file backup di flashdisk atau cloud agar data toko punya cadangan.</p></div></div>
@@ -177,3 +183,4 @@ export default function Pengaturan() {
     </div>
   )
 }
+import { useAuth } from '../hooks/useAuth'

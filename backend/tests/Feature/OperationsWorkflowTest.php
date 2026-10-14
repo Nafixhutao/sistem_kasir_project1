@@ -11,7 +11,8 @@ class OperationsWorkflowTest extends TestCase
 {
     public function test_brilink_expense_fee_supplier_return_activity_and_backup_workflows(): void
     {
-        Sanctum::actingAs(User::factory()->create());
+        $cashier = User::factory()->create();
+        Sanctum::actingAs($cashier);
 
         $this->postJson('/api/transfer', [
             'provider' => 'BRILink Mobile',
@@ -79,6 +80,8 @@ class OperationsWorkflowTest extends TestCase
         ])->assertCreated()->assertJsonPath('nama_pengeluaran', 'Pengeluaran Pengujian');
 
         $this->getJson('/api/biaya-admin')->assertOk()->assertJsonStructure(['layanan', 'data']);
+        $admin = User::factory()->create(); $admin->role = 'admin'; $admin->save();
+        Sanctum::actingAs($admin);
         $this->putJson('/api/biaya-admin/ewallet', [
             'ranges' => [[
                 'nominal_min' => 1,
@@ -87,6 +90,7 @@ class OperationsWorkflowTest extends TestCase
                 'aktif' => true,
             ]],
         ])->assertOk()->assertJsonPath('0.jenis_transaksi', 'ewallet');
+        Sanctum::actingAs($cashier);
 
         $barang = Barang::create([
             'kode_barang' => '000SUP001',

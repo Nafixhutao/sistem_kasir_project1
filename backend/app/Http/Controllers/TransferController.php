@@ -45,7 +45,7 @@ class TransferController extends Controller
         $data['tanggal'] = Carbon::today();
         $data = BrilinkFeeService::withNasabahFee($data, 'transfer', 'nominal_transfer');
         $adminFee = BrilinkFeeService::adminFeeFrom($data);
-        $data['kasir'] = 'admin';
+        $data['kasir'] = $request->user()->username;
 
         $transaksi = TransaksiTransfer::create($data);
         ActivityLog::record('Transfer', 'create', 'Admin menambahkan transaksi BRILink Transfer sebesar Rp' . number_format($nominalTransfer, 0, ',', '.') . ' dengan biaya admin Rp' . number_format($adminFee, 0, ',', '.'), $transaksi->toArray());

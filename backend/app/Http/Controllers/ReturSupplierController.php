@@ -8,6 +8,7 @@ use App\Models\ActivityLog;
 use App\Models\Barang;
 use App\Models\ReturSupplier;
 use App\Services\NotifikasiService;
+use App\Services\BusinessRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -52,7 +53,13 @@ class ReturSupplierController extends Controller
 
     public function store(StoreReturSupplierRequest $request)
     {
-        $retur = DB::transaction(function () use ($request) {
+        $payload = $request->validated();
+        unset($payload['request_id']);
+        $payload['barang_id']=(int)$payload['barang_id'];
+        $payload['jumlah_retur']=(int)$payload['jumlah_retur'];
+        $payload['tanggal_retur']=Carbon::parse($payload['tanggal_retur'])->toDateString();
+        $payload['keterangan']=$payload['keterangan'] ?? null;
+        [$retur] = BusinessRequest::execute(ReturSupplier::class, $request->validated('request_id'), $request->user()->id, $payload, function () use ($request) {
             $data = $request->validated();
             $barang = Barang::findOrFail($data['barang_id']);
 
@@ -67,13 +74,14 @@ class ReturSupplierController extends Controller
                 'alasan_retur' => $data['alasan_retur'],
                 'status_retur' => 'diproses',
                 'keterangan' => $data['keterangan'] ?? null,
-                'kasir' => 'admin',
+                'kasir' => $request->user()->username,
             ]);
 
             ActivityLog::record('Retur Supplier', 'create', 'Admin membuat retur supplier ' . $barang->nama_barang . ' sebanyak ' . $retur->jumlah_retur . ' unit.', $retur->toArray());
 
             return $retur->load('barang');
         });
+        $retur->load('barang');
 
         return response()->json($retur, 201);
     }

@@ -14,6 +14,7 @@ class StoreReturSupplierRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'request_id' => 'required|uuid',
             'tanggal_retur' => 'required|date',
             'nama_supplier' => 'required|string|max:150',
             'barang_id' => 'required|integer|min:1|max:4294967295|exists:barang,id',

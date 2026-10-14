@@ -10,8 +10,10 @@ import SalesReceiptModal from '../components/Sales/SalesReceiptModal'
 import SalesScannerModals from '../components/Sales/SalesScannerModals'
 import toast from 'react-hot-toast'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { useBusinessRequest } from '../hooks/useBusinessRequest'
 
 export default function TransaksiPenjualan() {
+  const businessRequest = useBusinessRequest()
   const [cart, setCart] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [products, setProducts] = useState([])
@@ -235,6 +237,7 @@ export default function TransaksiPenjualan() {
   }
 
   const handleCheckout = async (method = paymentMethod) => {
+    if (businessRequest.isBusy()) return
     if (cart.length === 0) return toast.error('Keranjang kosong')
     if (method === 'tunai' && uangBayarValue < totalHarga) return toast.error('Uang bayar kurang')
     if (method === 'qris' && qrisData?.order_id && !['settlement', 'capture'].includes(qrisStatus)) {
@@ -261,12 +264,13 @@ export default function TransaksiPenjualan() {
 
     setLoading(true)
     try {
-      const res = await api.post('/penjualan', {
+      const res = await businessRequest.submit('/penjualan', {
         items: receiptItems,
         metode_pembayaran: method,
         uang_bayar: method === 'tunai' ? receiptPaid : null,
         qris_order_id: method === 'qris' ? qrisData?.order_id : null
       })
+      if (!res) return
       if (method === 'qris') {
         playPaymentSuccessSound()
         speakQrisPaymentSuccess(receiptTotal)

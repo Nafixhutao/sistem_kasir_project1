@@ -12,7 +12,7 @@ class BarangController extends Controller
 {
     public function index()
     {
-        return response()->json(Barang::orderBy('created_at', 'desc')->get());
+        return response()->json(Barang::with('supplier:id,nama_supplier')->orderBy('created_at', 'desc')->get());
     }
 
     public function store(Request $request)
@@ -24,17 +24,18 @@ class BarangController extends Controller
             'stok' => 'required|integer|min:0',
             'harga_beli' => 'required|numeric|min:0',
             'harga_jual' => 'required|numeric|min:0',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
         ]);
 
         $barang = Barang::create($data);
         NotifikasiService::syncStockNotification($barang, null);
         ActivityLog::record('Barang', 'create', 'Menambah barang ' . $barang->nama_barang, $barang->toArray());
-        return response()->json($barang, 201);
+        return response()->json($barang->load('supplier:id,nama_supplier'), 201);
     }
 
     public function show($id)
     {
-        return response()->json(Barang::findOrFail($id));
+        return response()->json(Barang::with('supplier:id,nama_supplier')->findOrFail($id));
     }
 
     public function update(Request $request, $id)
@@ -47,12 +48,13 @@ class BarangController extends Controller
             'stok' => 'required|integer|min:0',
             'harga_beli' => 'required|numeric|min:0',
             'harga_jual' => 'required|numeric|min:0',
+            'supplier_id' => 'nullable|integer|exists:suppliers,id',
         ]);
         $previousStock = (int) $barang->stok;
         $barang->update($data);
         NotifikasiService::syncStockNotification($barang, $previousStock);
         ActivityLog::record('Barang', 'update', 'Memperbarui barang ' . $barang->nama_barang, $barang->toArray());
-        return response()->json($barang);
+        return response()->json($barang->load('supplier:id,nama_supplier'));
     }
 
     public function destroy($id)
@@ -73,7 +75,7 @@ class BarangController extends Controller
     public function search(Request $request)
     {
         $data = $request->validate(['q' => 'nullable|string|max:150']);
-        $query = Barang::query();
+        $query = Barang::with('supplier:id,nama_supplier');
         if (!empty($data['q'])) {
             $search = $data['q'];
             $query->where('kode_barang', 'like', "%{$search}%")
@@ -92,6 +94,7 @@ class BarangController extends Controller
             'items.*.stok' => 'required|integer|min:0',
             'items.*.harga_beli' => 'required|numeric|min:0',
             'items.*.harga_jual' => 'required|numeric|min:0',
+            'items.*.supplier_id' => 'nullable|integer|exists:suppliers,id',
         ]);
 
         $created = 0;

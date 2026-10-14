@@ -103,7 +103,8 @@ export default function Header({ user }) {
       }
       if (notification.url) {
         setOpen(false)
-        navigate(notification.url)
+        const ownerPaths = ['/dashboard','/barang','/data-supplier','/laporan-penjualan','/retur-supplier','/retur-barang-pelanggan','/pengeluaran-toko','/riwayat-brilink','/biaya-admin','/pengaturan','/manajemen-pengguna']
+        navigate(user?.role === 'admin' && !ownerPaths.includes(notification.url.split('?')[0]) ? '/dashboard' : notification.url)
       }
     } catch (err) {
       setError(getApiErrorMessage(err, 'Gagal menandai notifikasi.'))
@@ -209,7 +210,7 @@ export default function Header({ user }) {
           </div>
           <div>
             <p>{user?.name || 'Admin'}</p>
-            <span>Administrator</span>
+            <span>{user?.role === 'admin' ? 'Admin' : 'Kasir'}</span>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class TransaksiPenjualan extends Model
 {
     protected $table = 'transaksi_penjualan';
+    protected $hidden = ['request_hash'];
     protected $fillable = [
         'kode_transaksi', 'tanggal', 'metode_pembayaran', 'status',
         'total_harga', 'uang_bayar', 'kembalian', 'kasir',

@@ -17,6 +17,8 @@ return [
 
     'default' => env('CACHE_DRIVER', 'file'),
 
+    'limiter' => 'auth_limiter',
+
     /*
     |--------------------------------------------------------------------------
     | Cache Stores
@@ -32,6 +34,12 @@ return [
     */
 
     'stores' => [
+
+        'auth_limiter' => [
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/auth-limiter'),
+            'lock_path' => storage_path('framework/cache/auth-limiter'),
+        ],
 
         'apc' => [
             'driver' => 'apc',
