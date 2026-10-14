@@ -45,7 +45,7 @@ services:
     volumes:
       - app_storage:/var/www/html/storage
     ports:
-      - "${APP_PORT:-8080}:80"
+      - "127.0.0.1:${APP_PORT:-8080}:80"
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost/"]
       interval: 10s

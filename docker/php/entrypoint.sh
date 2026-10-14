@@ -18,29 +18,30 @@ chmod -R 775 storage bootstrap/cache
 echo "==> Menyiapkan file .env"
 if [ ! -f .env ]; then
     cat > .env <<EOF
-APP_NAME=${APP_NAME:-Sultan Cell}
-APP_ENV=${APP_ENV:-production}
-APP_KEY=${APP_KEY:-}
-APP_DEBUG=${APP_DEBUG:-false}
-APP_URL=${APP_URL:-http://localhost:8080}
+APP_NAME="${APP_NAME:-Sultan Cell}"
+APP_ENV="${APP_ENV:-production}"
+APP_KEY="${APP_KEY:-}"
+APP_DEBUG="${APP_DEBUG:-false}"
+APP_URL="${APP_URL:-http://localhost:8080}"
 
-LOG_CHANNEL=${LOG_CHANNEL:-stack}
+LOG_CHANNEL="${LOG_CHANNEL:-stack}"
 LOG_DEPRECATIONS_CHANNEL=null
-LOG_LEVEL=${LOG_LEVEL:-error}
+LOG_LEVEL="${LOG_LEVEL:-error}"
 
-DB_CONNECTION=${DB_CONNECTION:-mysql}
-DB_HOST=${DB_HOST:-db}
-DB_PORT=${DB_PORT:-3306}
-DB_DATABASE=${DB_DATABASE:-sistem_project1}
-DB_USERNAME=${DB_USERNAME:-sultan}
-DB_PASSWORD=${DB_PASSWORD:-sultan123}
+DB_CONNECTION="${DB_CONNECTION:-mysql}"
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
+DB_DATABASE="${DB_DATABASE:-sistem_project1}"
+DB_USERNAME="${DB_USERNAME:-sultan}"
+DB_PASSWORD="${DB_PASSWORD:-sultan123}"
 
 BROADCAST_DRIVER=log
-CACHE_DRIVER=${CACHE_DRIVER:-file}
+CACHE_DRIVER="${CACHE_DRIVER:-file}"
 FILESYSTEM_DISK=local
 QUEUE_CONNECTION=sync
-SESSION_DRIVER=${SESSION_DRIVER:-file}
+SESSION_DRIVER="${SESSION_DRIVER:-file}"
 SESSION_LIFETIME=120
+SESSION_SECURE_COOKIE="${SESSION_SECURE_COOKIE:-true}"
 EOF
 fi
 

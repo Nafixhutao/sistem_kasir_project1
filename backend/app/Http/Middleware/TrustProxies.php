@@ -10,9 +10,13 @@ class TrustProxies extends Middleware
     /**
      * The trusted proxies for this application.
      *
+     * Aplikasi berjalan di belakang Cloudflare Tunnel (cloudflared) yang
+     * men-terminate TLS, sehingga header X-Forwarded-* harus dipercaya agar
+     * Laravel mengenali request sebagai HTTPS.
+     *
      * @var array<int, string>|string|null
      */
-    protected $proxies;
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
