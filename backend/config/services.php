@@ -38,4 +38,19 @@ return [
         'base_url' => env('MIDTRANS_BASE_URL', 'https://api.sandbox.midtrans.com'),
     ],
 
+    'sumopod' => [
+        'api_key' => env('SUMOPOD_API_KEY'),
+        'base_url' => env('SUMOPOD_BASE_URL', 'https://api-pay-sandbox.sumopod.com/api/v1'),
+        'webhook_token' => env('SUMOPOD_WEBHOOK_TOKEN'),
+        'webhook_secret' => env('SUMOPOD_WEBHOOK_SECRET'),
+        // Hanya untuk sandbox: mengizinkan kasir menandai pembayaran lunas
+        // secara manual bila webhook tidak bisa dipicu dari dashboard.
+        'allow_manual_confirm' => env('SUMOPOD_ALLOW_MANUAL_CONFIRM', false),
+    ],
+
+    // Provider QRIS yang dipakai halaman Transaksi Penjualan: "midtrans" atau "sumopod".
+    'payment' => [
+        'provider' => env('PAYMENT_PROVIDER', 'midtrans'),
+    ],
+
 ];

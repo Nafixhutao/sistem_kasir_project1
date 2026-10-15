@@ -28,6 +28,7 @@ foreach (['id', 'barang', 'supplier', 'transfer', 'tarik_tunai', 'setor_tunai', 
 // Public routes
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/midtrans/notification', [PenjualanController::class, 'qrisWebhook']);
+Route::post('/sumopod/webhook', [PenjualanController::class, 'sumopodWebhook']);
 
 // Protected routes
 Route::middleware(['auth:sanctum', \App\Http\Middleware\AccountAccess::class])->group(function () {
@@ -53,6 +54,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AccountAccess::class])->
     Route::post('/penjualan', [PenjualanController::class, 'store']);
     Route::post('/penjualan/qris', [PenjualanController::class, 'qris']);
     Route::post('/penjualan/qris/status', [PenjualanController::class, 'qrisStatus']);
+    Route::post('/penjualan/qris/manual-confirm', [PenjualanController::class, 'qrisManualConfirm']);
     Route::post('/penjualan/{id}/cancel', [PenjualanController::class, 'cancel']);
     Route::post('/penjualan/{id}/retur', [PenjualanController::class, 'retur']);
     Route::get('/penjualan/invoice/{id}', [PenjualanController::class, 'invoice']);

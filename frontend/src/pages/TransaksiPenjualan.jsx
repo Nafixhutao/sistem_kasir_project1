@@ -26,6 +26,7 @@ export default function TransaksiPenjualan() {
   const [qrisData, setQrisData] = useState(null)
   const [qrisError, setQrisError] = useState('')
   const [qrisStatus, setQrisStatus] = useState('')
+  const [manualConfirming, setManualConfirming] = useState(false)
   const [scannerOpen, setScannerOpen] = useState(false)
   const [usbScannerOpen, setUsbScannerOpen] = useState(false)
   const [scannerError, setScannerError] = useState('')
@@ -55,7 +56,7 @@ export default function TransaksiPenjualan() {
     if (paymentMethod !== 'qris' || !qrisData?.order_id || ['settlement', 'capture'].includes(qrisStatus)) return
 
     const interval = window.setInterval(() => {
-      checkMidtransQrisStatus(false)
+      checkQrisStatus(false)
     }, 5000)
 
     return () => window.clearInterval(interval)
@@ -127,6 +128,12 @@ export default function TransaksiPenjualan() {
     window.location.assign('https://simulator.sandbox.midtrans.com/')
   }
 
+  const openPaymentPage = () => {
+    const url = qrisData?.payment_url || qrisData?.qris_url
+    if (!url) return toast.error('Link pembayaran belum tersedia')
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   const closePaymentModal = () => {
     setShowPayment(false)
     setPaymentMethod('tunai')
@@ -134,15 +141,17 @@ export default function TransaksiPenjualan() {
     setQrisData(null)
     setQrisStatus('')
     setQrisError('')
+    setManualConfirming(false)
     qrisAutoCheckoutRef.current = false
   }
 
-  const createMidtransQris = async () => {
+  const createQris = async () => {
     if (cart.length === 0) return
     setQrisLoading(true)
     setQrisError('')
     setQrisData(null)
     setQrisStatus('')
+    setManualConfirming(false)
     qrisAutoCheckoutRef.current = false
     try {
       const res = await api.post('/penjualan/qris', {
@@ -157,15 +166,15 @@ export default function TransaksiPenjualan() {
       setQrisData(res.data)
       setQrisStatus(res.data?.status || 'pending')
     } catch (e) {
-      setQrisError(getApiErrorMessage(e, 'Gagal membuat QRIS Midtrans'))
+      setQrisError(getApiErrorMessage(e, 'Gagal membuat QRIS'))
     } finally {
       setQrisLoading(false)
     }
   }
 
-  const checkMidtransQrisStatus = async (showMessage = true) => {
+  const checkQrisStatus = async (showMessage = true) => {
     if (!qrisData?.order_id) {
-      if (showMessage) toast.error('Buat QRIS Midtrans dulu')
+      if (showMessage) toast.error('Buat QRIS dulu')
       return ''
     }
 
@@ -184,10 +193,27 @@ export default function TransaksiPenjualan() {
       }
       return latestStatus
     } catch (e) {
-      setQrisError(getApiErrorMessage(e, 'Gagal mengecek status pembayaran Midtrans'))
+      setQrisError(getApiErrorMessage(e, 'Gagal mengecek status pembayaran QRIS'))
       return ''
     } finally {
       setQrisChecking(false)
+    }
+  }
+
+  const manualConfirmQris = async () => {
+    if (!qrisData?.order_id) return toast.error('Buat QRIS dulu')
+    if (!window.confirm('Tandai pembayaran ini LUNAS secara manual?\n\nHanya untuk ujicoba sandbox — pastikan pembayaran benar-benar sudah diterima.')) return
+
+    setManualConfirming(true)
+    setQrisError('')
+    try {
+      await api.post('/penjualan/qris/manual-confirm', { order_id: qrisData.order_id })
+      setQrisStatus('settlement')
+      toast.success('Pembayaran ditandai lunas (sandbox)')
+    } catch (e) {
+      setQrisError(getApiErrorMessage(e, 'Gagal mengonfirmasi pembayaran'))
+    } finally {
+      setManualConfirming(false)
     }
   }
 
@@ -241,13 +267,13 @@ export default function TransaksiPenjualan() {
     if (cart.length === 0) return toast.error('Keranjang kosong')
     if (method === 'tunai' && uangBayarValue < totalHarga) return toast.error('Uang bayar kurang')
     if (method === 'qris' && qrisData?.order_id && !['settlement', 'capture'].includes(qrisStatus)) {
-      const latestStatus = await checkMidtransQrisStatus(false)
+      const latestStatus = await checkQrisStatus(false)
       if (!['settlement', 'capture'].includes(latestStatus)) {
-        return toast.error('Pembayaran QRIS belum berhasil. Bayar lewat simulator Midtrans dulu, lalu cek status.')
+        return toast.error('Pembayaran QRIS belum berhasil. Selesaikan pembayaran lalu cek status.')
       }
     }
     if (method === 'qris' && !qrisData?.order_id) {
-      return toast.error('Buat QRIS Midtrans dulu sebelum konfirmasi')
+      return toast.error('Buat QRIS dulu sebelum konfirmasi')
     }
     const stockProblem = cart.find(item => item.jumlah > Number(item.stok))
     if (stockProblem) return toast.error(`Stok ${stockProblem.nama_barang} tidak cukup`)
@@ -471,10 +497,13 @@ export default function TransaksiPenjualan() {
         qrisChecking={qrisChecking}
         qrisError={qrisError}
         qrisStatus={qrisStatus}
-        onCreateQris={createMidtransQris}
+        onCreateQris={createQris}
         onCopyQrisUrl={copyQrisUrl}
         onOpenSimulator={openMidtransSimulator}
-        onCheckQrisStatus={checkMidtransQrisStatus}
+        onCheckQrisStatus={checkQrisStatus}
+        onOpenPaymentPage={openPaymentPage}
+        onManualConfirm={manualConfirmQris}
+        manualConfirming={manualConfirming}
         formatQrisStatus={formatQrisStatus}
       />
 

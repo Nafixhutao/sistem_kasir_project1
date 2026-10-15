@@ -3137,6 +3137,22 @@ button { cursor: pointer; }
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
 }
 
+.qris-code {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #fff;
+  border: 10px solid #fff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+}
+
+.qris-code svg {
+  display: block;
+  width: 220px;
+  height: 220px;
+}
+
 .qris-box h3 {
   color: #0f172a;
   font-size: 18px;

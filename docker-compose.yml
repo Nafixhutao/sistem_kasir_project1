@@ -46,6 +46,12 @@ services:
       MIDTRANS_CLIENT_KEY: ${MIDTRANS_CLIENT_KEY:-}
       MIDTRANS_MERCHANT_ID: ${MIDTRANS_MERCHANT_ID:-}
       MIDTRANS_BASE_URL: ${MIDTRANS_BASE_URL:-https://api.sandbox.midtrans.com}
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-midtrans}
+      SUMOPOD_API_KEY: ${SUMOPOD_API_KEY:-}
+      SUMOPOD_BASE_URL: ${SUMOPOD_BASE_URL:-https://api-pay-sandbox.sumopod.com/api/v1}
+      SUMOPOD_WEBHOOK_TOKEN: ${SUMOPOD_WEBHOOK_TOKEN:-}
+      SUMOPOD_WEBHOOK_SECRET: ${SUMOPOD_WEBHOOK_SECRET:-}
+      SUMOPOD_ALLOW_MANUAL_CONFIRM: ${SUMOPOD_ALLOW_MANUAL_CONFIRM:-false}
     volumes:
       - app_storage:/var/www/html/storage
     ports:
