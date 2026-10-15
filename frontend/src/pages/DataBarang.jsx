@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Plus, Search, Edit3, Trash2, Package, Boxes, AlertTriangle, Tags, Camera, Keyboard, ScanLine, X, Barcode, Upload } from 'lucide-react'
 import { formatRupiah } from '../utils/formatRupiah'
+import { cleanNominalInput, formatNominalInput } from '../utils/nominalInput'
 import { playScanBeep } from '../utils/audioFeedback'
 import api, { getApiErrorMessage } from '../services/api'
 import Modal from '../components/Common/Modal'
@@ -501,11 +502,11 @@ export default function DataBarang() {
             </label>
             <label className="field-group">
               <span>Harga Beli</span>
-              <input type="number" value={form.harga_beli} onChange={e => setForm({ ...form, harga_beli: e.target.value })} required />
+              <input type="text" inputMode="numeric" value={formatNominalInput(form.harga_beli)} onChange={e => setForm({ ...form, harga_beli: cleanNominalInput(e.target.value) })} required />
             </label>
             <label className="field-group">
               <span>Harga Jual</span>
-              <input type="number" value={form.harga_jual} onChange={e => setForm({ ...form, harga_jual: e.target.value })} required />
+              <input type="text" inputMode="numeric" value={formatNominalInput(form.harga_jual)} onChange={e => setForm({ ...form, harga_jual: cleanNominalInput(e.target.value) })} required />
             </label>
           </div>
 
