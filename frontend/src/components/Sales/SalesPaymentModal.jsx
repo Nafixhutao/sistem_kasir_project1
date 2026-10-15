@@ -130,7 +130,7 @@ export default function SalesPaymentModal({
                 {isQrisPaid
                   ? 'Pembayaran diterima. Nota akan muncul otomatis.'
                   : isSumopod && qrValue && !qrisData?.payment_code
-                    ? 'Scan QR dengan kamera ponsel untuk membuka halaman pembayaran SumoPod, lalu selesaikan pembayaran QRIS di sana. Status di aplikasi ikut diperbarui setelah pembayaran diterima.'
+                    ? 'Scan QR, bayar di halaman SumoPod, lalu tekan "I have already paid" di halaman itu. Aplikasi mengecek status pembayaran otomatis setiap beberapa detik, jadi status akan berubah hijau begitu SumoPod menerima pembayaran.'
                     : 'Scan QRIS menggunakan GoPay, ShopeePay, mobile banking, atau e-wallet lain yang mendukung QRIS. Sistem akan menyimpan transaksi otomatis setelah pembayaran berhasil.'}
               </span>
             </div>

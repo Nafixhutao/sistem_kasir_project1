@@ -13,6 +13,7 @@ use App\Models\PembayaranQris;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Services\NotifikasiService;
 use App\Services\BusinessRequest;
@@ -20,6 +21,9 @@ use Illuminate\Support\Facades\Validator;
 
 class PenjualanController extends Controller
 {
+    /** Jeda minimum (detik) antar pengecekan status ke SumoPod. */
+    private const SUMOPOD_STATUS_TTL = 5;
+
     public function index()
     {
         return response()->json(
@@ -122,6 +126,10 @@ class PenjualanController extends Controller
                 }
 
                 if ($pembayaran) {
+                    // Cek ulang ke SumoPod lebih dulu: bila pelanggan sudah benar-benar membayar
+                    // tetapi webhook belum sampai, status lokal disamakan sebelum dinilai.
+                    $pembayaran = $this->syncSumopodStatus($pembayaran);
+
                     // Baris sudah dibuat saat QRIS diminta (alur SumoPod). Pembayaran wajib
                     // sudah dikonfirmasi sebelum nota disimpan.
                     if ($pembayaran->status_pembayaran !== 'settlement') {
@@ -328,13 +336,15 @@ class PenjualanController extends Controller
             'order_id' => 'required|string|max:100',
         ]);
 
-        // SumoPod tidak menyediakan endpoint cek status. Status disimpan lokal dan
-        // diperbarui oleh webhook payment.completed / payment.failed / payment.expired.
+        // Status disimpan lokal, diperbarui oleh webhook payment.completed / payment.failed /
+        // payment.expired, dan dicek ulang langsung ke SumoPod bila webhook belum sampai.
         $sumopod = PembayaranQris::where('order_id', $data['order_id'])
             ->where('provider', 'sumopod')
             ->first();
 
         if ($sumopod) {
+            $sumopod = $this->syncSumopodStatus($sumopod);
+
             return response()->json([
                 'provider' => 'sumopod',
                 'order_id' => $sumopod->order_id,
@@ -629,6 +639,69 @@ class PenjualanController extends Controller
             'order_id' => $orderId,
             'status' => $qris->status_pembayaran,
         ]);
+    }
+
+    /**
+     * Samakan status pembayaran SumoPod dengan status sebenarnya di sisi SumoPod.
+     *
+     * Webhook tetap jalur utama, tetapi bila webhook tidak sampai (URL salah, server
+     * sempat mati, dsb.) status lokal bisa tertinggal "pending" padahal pelanggan sudah
+     * membayar. Endpoint ini adalah sumber yang sama dengan yang dipakai halaman
+     * pembayaran SumoPod saat menampilkan hasil ke pelanggan.
+     */
+    private function syncSumopodStatus(PembayaranQris $qris): PembayaranQris
+    {
+        if ($qris->provider !== 'sumopod' || !$qris->transaction_id) {
+            return $qris;
+        }
+
+        if (in_array($qris->status_pembayaran, ['settlement', 'expire', 'cancel', 'deny'], true)) {
+            return $qris;
+        }
+
+        // Halaman kasir mem-polling tiap beberapa detik; batasi agar tidak membanjiri SumoPod.
+        $cacheKey = 'sumopod:status:' . $qris->order_id;
+        if (Cache::has($cacheKey)) {
+            return $qris;
+        }
+        Cache::put($cacheKey, true, self::SUMOPOD_STATUS_TTL);
+
+        $baseUrl = rtrim(config('services.sumopod.base_url'), '/');
+
+        try {
+            $response = Http::withHeaders(['X-Api-Key' => config('services.sumopod.api_key')])
+                ->acceptJson()
+                ->timeout(5)
+                ->get($baseUrl . '/public/payments/' . urlencode($qris->transaction_id) . '/status');
+        } catch (\Throwable $e) {
+            return $qris; // status lokal tetap dipakai bila SumoPod tidak bisa dihubungi
+        }
+
+        if (!$response->successful()) {
+            return $qris;
+        }
+
+        $status = $this->mapSumopodStatus((string) $response->json('status'));
+        if (!$status || $status === $qris->status_pembayaran) {
+            return $qris;
+        }
+
+        $previousStatus = $qris->status_pembayaran;
+        $qris->status_pembayaran = $status;
+        if ($status === 'settlement' && !$qris->paid_at) {
+            $qris->paid_at = now();
+        }
+        $qris->payment_response = array_merge((array) $qris->payment_response, [
+            'status_poll' => [
+                'at' => now()->toISOString(),
+                'status' => $response->json('status'),
+            ],
+        ]);
+        $qris->save();
+
+        NotifikasiService::qrisStatusChanged($qris->fresh(), $previousStatus, $status);
+
+        return $qris;
     }
 
     private function mapSumopodStatus(string $haystack): ?string
