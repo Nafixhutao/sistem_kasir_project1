@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { CreditCard, Landmark, ReceiptText, Save, Settings, SlidersHorizontal, WalletCards } from 'lucide-react'
 import { formatRupiah } from '../utils/formatRupiah'
+import { cleanNominalInput, formatNominalInput } from '../utils/nominalInput'
 import { getJenisKartuNasabah } from '../utils/brilinkNasabah'
 import {
   createBiayaAdminSection,
@@ -164,15 +165,15 @@ export default function PengaturanBiayaAdmin() {
                         <div key={rangeIndex} className="admin-range-row">
                           <label>
                             <span>Dari</span>
-                            <input type="number" readOnly={!canManage} value={range.nominal_min} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_min', e.target.value)} />
+                            <input type="text" inputMode="numeric" readOnly={!canManage} value={formatNominalInput(range.nominal_min)} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_min', cleanNominalInput(e.target.value))} />
                           </label>
                           <label>
                             <span>Sampai</span>
-                            <input type="number" readOnly={!canManage} value={range.nominal_max ?? ''} placeholder="Ke atas" onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_max', e.target.value)} />
+                            <input type="text" inputMode="numeric" readOnly={!canManage} value={formatNominalInput(range.nominal_max ?? '')} placeholder="Ke atas" onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'nominal_max', cleanNominalInput(e.target.value))} />
                           </label>
                           <label>
                             <span>Admin</span>
-                            <input type="number" readOnly={!canManage} value={range.biaya_admin} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'biaya_admin', e.target.value)} />
+                            <input type="text" inputMode="numeric" readOnly={!canManage} value={formatNominalInput(range.biaya_admin)} onChange={e => updateRange(section.jenisTransaksi, section.jenisNasabah, rangeIndex, 'biaya_admin', cleanNominalInput(e.target.value))} />
                           </label>
                           <p>{formatRangeText(range)} = {formatRupiah(range.biaya_admin)}</p>
                         </div>
