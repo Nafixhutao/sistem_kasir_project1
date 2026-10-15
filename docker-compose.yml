@@ -42,6 +42,10 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-sultan123}
       CACHE_DRIVER: ${CACHE_DRIVER:-file}
       SESSION_DRIVER: ${SESSION_DRIVER:-file}
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_CLIENT_KEY: ${MIDTRANS_CLIENT_KEY:-}
+      MIDTRANS_MERCHANT_ID: ${MIDTRANS_MERCHANT_ID:-}
+      MIDTRANS_BASE_URL: ${MIDTRANS_BASE_URL:-https://api.sandbox.midtrans.com}
     volumes:
       - app_storage:/var/www/html/storage
     ports:
