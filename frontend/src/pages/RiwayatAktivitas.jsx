@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Activity, Search } from 'lucide-react'
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
+import { formatDateTime } from '../utils/formatDateTime'
 
 export default function RiwayatAktivitas() {
   const [data, setData] = useState([])
@@ -36,7 +37,7 @@ export default function RiwayatAktivitas() {
             <thead><tr><th>Waktu</th><th>Modul</th><th>Aksi</th><th>Keterangan</th><th>User</th></tr></thead>
             <tbody>{data.map(item => (
               <tr key={item.id}>
-                <td>{new Date(item.created_at).toLocaleString('id-ID')}</td>
+                <td className="nowrap">{formatDateTime(item.created_at)}</td>
                 <td><span className="service-pill blue">{item.module}</span></td>
                 <td>{item.action}</td>
                 <td>{item.description || '-'}</td>

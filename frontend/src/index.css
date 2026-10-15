@@ -4905,6 +4905,11 @@ button { cursor: pointer; }
   overflow-wrap: anywhere;
 }
 
+/* Kolom waktu harus utuh satu baris, tidak dipecah oleh aturan di atas. */
+.brilink-table td.nowrap {
+  white-space: nowrap;
+}
+
 .money-cell,
 .money-cell strong,
 .cart-total strong,

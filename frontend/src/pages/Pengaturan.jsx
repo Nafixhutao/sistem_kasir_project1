@@ -4,6 +4,7 @@ import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
 import ChangePasswordForm from '../components/Auth/ChangePasswordForm'
+import { formatDateTime } from '../utils/formatDateTime'
 
 export default function Pengaturan() {
   const { user } = useAuth()
@@ -116,7 +117,7 @@ export default function Pengaturan() {
                 <thead><tr><th>Waktu</th><th>Modul</th><th>Aksi</th><th>Keterangan</th><th>User</th></tr></thead>
                 <tbody>{activityData.map(item => (
                   <tr key={item.id}>
-                    <td>{new Date(item.created_at).toLocaleString('id-ID')}</td>
+                    <td className="nowrap">{formatDateTime(item.created_at)}</td>
                     <td><span className="service-pill blue">{item.module}</span></td>
                     <td>{item.action}</td>
                     <td>{item.description || '-'}</td>
