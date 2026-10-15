@@ -455,7 +455,7 @@ export default function LaporanPenjualan() {
               <div className="receipt-meta">
                 <div><span>No</span><strong>{selectedTransaction.kode_transaksi}</strong></div>
                 <div><span>Waktu</span><strong>{formatDateTime(selectedTransaction.created_at || selectedTransaction.tanggal)}</strong></div>
-                <div><span>Kasir</span><strong>{selectedTransaction.kasir || 'Admin'}</strong></div>
+                <div><span>Kasir</span><strong>{selectedTransaction.kasir || '-'}</strong></div>
                 <div><span>Status</span><strong>{selectedTransaction.status}</strong></div>
                 <div><span>Bayar</span><strong>{selectedTransaction.metode_pembayaran?.toUpperCase()}</strong></div>
                 <div><span>Retur</span><strong>{selectedTransaction.has_customer_return ? 'Ada Retur' : '-'}</strong></div>

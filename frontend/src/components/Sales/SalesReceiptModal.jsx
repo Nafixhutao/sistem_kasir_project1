@@ -37,7 +37,7 @@ export default function SalesReceiptModal({ isOpen, onClose, receipt }) {
             <div className="receipt-meta">
               <div><span>No</span><strong>{receipt.kode_transaksi}</strong></div>
               <div><span>Waktu</span><strong>{formatReceiptDate(receipt.waktu)}</strong></div>
-              <div><span>Kasir</span><strong>Admin</strong></div>
+              <div><span>Kasir</span><strong>{receipt.kasir || '-'}</strong></div>
               <div><span>Bayar</span><strong>{receipt.metode_pembayaran.toUpperCase()}</strong></div>
             </div>
 

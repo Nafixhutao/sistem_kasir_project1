@@ -305,6 +305,7 @@ export default function TransaksiPenjualan() {
       setLastReceipt({
         kode_transaksi: res.data?.transaksi?.kode_transaksi || `TRX-${Date.now()}`,
         waktu: new Date().toISOString(),
+        kasir: res.data?.transaksi?.kasir || '',
         metode_pembayaran: method,
         items: receiptItems,
         total: Number(res.data?.transaksi?.total_harga || receiptTotal),
