@@ -4307,6 +4307,13 @@ button { cursor: pointer; }
   font-size: 12px;
 }
 
+/* Pil status di dalam sel bertumpuk (mis. kolom Jenis di Transfer):
+   biarkan selebar isinya supaya sama rata dengan pil di kolom lain */
+.person-cell .service-pill {
+  display: inline-flex;
+  width: fit-content;
+}
+
 .service-pill {
   display: inline-flex;
   align-items: center;
@@ -4943,6 +4950,44 @@ button { cursor: pointer; }
 .status-pill,
 td.nowrap {
   white-space: nowrap;
+}
+
+/* Kolom Kode (kolom pertama) tetap menempel saat tabel digeser ke samping. */
+.inventory-table th:first-child,
+.report-table th:first-child,
+.brilink-table th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #f8fafc;
+  box-shadow: inset -1px 0 0 #e2e8f0;
+}
+
+.inventory-table td:first-child,
+.report-table td:first-child,
+.brilink-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: #fff;
+  box-shadow: inset -1px 0 0 #edf2f7;
+}
+
+.inventory-table tbody tr:hover td:first-child,
+.brilink-table tbody tr:hover td:first-child {
+  background: #f8fbff;
+}
+
+/* Panel filter: tidak boleh ada isian yang keluar dari tepi kartu. */
+.brilink-filter-panel,
+.report-filter-panel {
+  min-width: 0;
+}
+
+.brilink-filter-panel > *,
+.report-filter-panel > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .money-cell,
@@ -5864,5 +5909,79 @@ td.nowrap {
     min-height: 42px;
     padding: 0 12px;
     font-size: 12px;
+  }
+}
+
+/* ============================================================
+   Penyesuaian layar ponsel
+   ============================================================ */
+
+/* Status bar / poni: jangan sampai ada isi yang tertutup. */
+.app-sidebar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.topbar {
+  padding-top: calc(14px + env(safe-area-inset-top, 0px));
+}
+
+.app-main {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Input tanggal bawaan ponsel (iOS/Samsung) tampil abu-abu dan bisa lebih
+   lebar dari kartunya; paksa ikut lebar kolom seperti input biasa. */
+@media (hover: none) and (pointer: coarse) {
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="time"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    background-color: #fff;
+    text-align: left;
+  }
+}
+
+@media (max-width: 720px) {
+  /* Topbar tidak tembus pandang: isi halaman tidak terlihat di baliknya. */
+  .topbar {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+  }
+
+  /* Halaman tidak bisa digeser ke samping. */
+  .app-main {
+    overflow-x: hidden;
+  }
+
+  /* Kolom Kode yang menempel dibuat lebih ramping di ponsel. */
+  .inventory-table th:first-child,
+  .inventory-table td:first-child,
+  .report-table th:first-child,
+  .report-table td:first-child,
+  .brilink-table th:first-child,
+  .brilink-table td:first-child {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* Rentang tanggal pada judul laporan dikecilkan agar tetap satu baris. */
+  .report-date-range {
+    justify-content: center;
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 440px) {
+  .topbar {
+    padding-top: calc(12px + env(safe-area-inset-top, 0px));
   }
 }
