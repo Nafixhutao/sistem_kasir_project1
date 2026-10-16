@@ -100,7 +100,7 @@ export default function Transfer() {
             <tbody>{data.map(t => (
               <tr key={t.id}>
                 <td><span className="item-code">{t.kode_transaksi}</span></td>
-                <td>{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
+                <td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill green">{t.provider || '-'}</span></td>
                 <td><div className="person-cell"><span className="service-pill blue">{t.jenis_transfer}</span><span>{t.bank_tujuan || '-'}</span></div></td>
                 <td><div className="person-cell"><strong>{getLabelJenisNasabah(t.jenis_nasabah)}</strong><span>{t.jenis_kartu || '-'}</span></div></td>

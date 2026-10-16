@@ -306,7 +306,7 @@ export default function ReturSupplier() {
               <tbody>{data.map(item => (
                 <tr key={item.id}>
                   <td><span className="item-code">{item.nomor_retur}</span></td>
-                  <td>{new Date(item.tanggal_retur).toLocaleDateString('id-ID')}</td>
+                  <td className="nowrap">{new Date(item.tanggal_retur).toLocaleDateString('id-ID')}</td>
                   <td><strong>{item.nama_supplier}</strong></td>
                   <td><div className="person-cell"><strong>{item.nama_barang}</strong><span>{item.kode_barang}</span></div></td>
                   <td>{item.jumlah_retur} pcs</td>

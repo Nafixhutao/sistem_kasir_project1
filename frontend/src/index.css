@@ -4400,7 +4400,7 @@ button { cursor: pointer; }
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .table-action-button {
@@ -4915,14 +4915,33 @@ button { cursor: pointer; }
   table-layout: auto;
 }
 
+/* break-word (bukan anywhere) supaya kolom pendek tidak diperas sampai
+   teks terpotong per huruf; kata yang terlalu panjang tetap dipotong. */
 .inventory-table td,
 .report-table td,
-.brilink-table td {
-  overflow-wrap: anywhere;
+.brilink-table td,
+.supplier-table td,
+.ewallet-table td,
+.return-history-table td {
+  overflow-wrap: break-word;
 }
 
-/* Kolom waktu harus utuh satu baris, tidak dipecah oleh aturan di atas. */
-.brilink-table td.nowrap {
+/* Judul kolom selalu utuh satu baris. */
+.inventory-table th,
+.report-table th,
+.brilink-table th,
+.supplier-table th,
+.ewallet-table th,
+.return-history-table th {
+  white-space: nowrap;
+}
+
+/* Unsur pendek dalam sel: kode transaksi, pil pembayaran/status,
+   dan kolom yang diberi tanda .nowrap (mis. tanggal). */
+.item-code,
+.payment-pill,
+.status-pill,
+td.nowrap {
   white-space: nowrap;
 }
 
@@ -4970,7 +4989,7 @@ button { cursor: pointer; }
 .brilink-filter-panel,
 .brilink-summary-card,
 .admin-fee-card {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 @media (max-width: 980px) {

@@ -261,7 +261,7 @@ export default function ReturBarangPelanggan() {
                       <span>{transaction.details?.length || 0} item terjual</span>
                     </div>
                   </td>
-                  <td>{new Date(transaction.tanggal).toLocaleDateString('id-ID')}</td>
+                  <td className="nowrap">{new Date(transaction.tanggal).toLocaleDateString('id-ID')}</td>
                   <td><span className={`payment-pill ${transaction.metode_pembayaran}`}>{transaction.metode_pembayaran}</span></td>
                   <td><span className={`status-pill ${getStatusClass(transaction.status)}`}>{transaction.status}</span></td>
                   <td>{transaction.has_customer_return ? <span className="status-pill pending">Ada Retur</span> : '-'}</td>
@@ -368,7 +368,7 @@ export default function ReturBarangPelanggan() {
               {returnReport.retur.map(item => (
                 <tr key={item.id}>
                   <td><span className="item-code">{item.nomor_retur}</span></td>
-                  <td>{new Date(item.tanggal_retur).toLocaleDateString('id-ID')}</td>
+                  <td className="nowrap">{new Date(item.tanggal_retur).toLocaleDateString('id-ID')}</td>
                   <td>{item.kode_transaksi}</td>
                   <td>
                     <div className="report-item-list">

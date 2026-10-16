@@ -398,7 +398,7 @@ export default function LaporanPenjualan() {
                       <span>{transaction.details?.length || 0} item terjual</span>
                     </div>
                   </td>
-                  <td>{new Date(transaction.tanggal).toLocaleDateString('id-ID')}</td>
+                  <td className="nowrap">{new Date(transaction.tanggal).toLocaleDateString('id-ID')}</td>
                   <td><span className={`payment-pill ${transaction.metode_pembayaran}`}>{transaction.metode_pembayaran}</span></td>
                   <td><span className={`status-pill ${getStatusClass(transaction.status)}`}>{transaction.status}</span></td>
                   <td>{transaction.has_customer_return ? <span className="status-pill pending">Ada Retur</span> : '-'}</td>

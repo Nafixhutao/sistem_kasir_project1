@@ -121,7 +121,7 @@ export default function RiwayatBrilink() {
             <tbody>{data.data.map((t, index) => (
               <tr key={index}>
                 <td><span className="item-code">{t.kode_transaksi || '-'}</span></td>
-                <td>{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
+                <td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill blue">{t.jenis}</span></td>
                 <td><span className="service-pill green">{t.provider || '-'}</span></td>
                 <td>{t.jenis_nasabah ? getLabelJenisNasabah(t.jenis_nasabah) : '-'}</td>

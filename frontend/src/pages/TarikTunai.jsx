@@ -75,7 +75,7 @@ export default function TarikTunai() {
             <thead><tr><th>Kode</th><th>Tanggal</th><th>Provider</th><th>Penerima</th><th>Nasabah</th><th className="money-header">Nominal</th><th className="money-header">Admin</th><th className="money-header">Total</th><th>Status</th></tr></thead>
             <tbody>{data.map(t => (
               <tr key={t.id}>
-                <td><span className="item-code">{t.kode_transaksi}</span></td><td>{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
+                <td><span className="item-code">{t.kode_transaksi}</span></td><td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill green">{t.provider || '-'}</span></td>
                 <td><div className="person-cell"><strong>{t.nama_penerima}</strong><span>{t.nomor_rekening}</span></div></td>
                 <td><div className="person-cell"><strong>{getLabelJenisNasabah(t.jenis_nasabah)}</strong><span>{t.jenis_kartu || '-'}</span></div></td>

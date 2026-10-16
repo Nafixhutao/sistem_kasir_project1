@@ -112,7 +112,7 @@ export default function EWallet() {
             <tbody>{data.map(item => (
               <tr key={item.id}>
                 <td><span className="item-code">{item.kode_transaksi}</span></td>
-                <td>{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                <td className="nowrap">{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill blue">{item.jenis_transaksi === 'top_up' ? 'Top Up' : 'Pencairan'}</span></td>
                 <td>{item.provider}</td>
                 <td>{item.jenis_ewallet || item.provider}</td>

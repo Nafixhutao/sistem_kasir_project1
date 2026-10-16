@@ -110,7 +110,7 @@ export default function PengeluaranToko() {
             <thead><tr><th>Tanggal</th><th>Kategori</th><th>Nama</th><th className="money-header">Nominal</th><th>Keterangan</th><th>Aksi</th></tr></thead>
             <tbody>{data.map(item => (
               <tr key={item.id}>
-                <td>{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                <td className="nowrap">{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill orange">{item.kategori}</span></td>
                 <td>{item.nama_pengeluaran}</td>
                 <td className="money-cell strong">{formatRupiah(item.nominal)}</td>
