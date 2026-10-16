@@ -33,13 +33,19 @@ export default function SalesPaymentModal({
   onManualConfirm,
   manualConfirming,
   formatQrisStatus,
+  onOpenSimulationPage,
+  onCopySimulationLink,
 }) {
   const isQrisPaid = ['settlement', 'capture'].includes(qrisStatus)
   const isSumopod = qrisData?.provider === 'sumopod'
   // Midtrans mengirim langsung URL gambar QR; SumoPod hanya tautan halaman bayar,
   // sehingga QR digambar sendiri (kode QRIS asli bila tersedia, jika tidak tautannya).
   const qrImageUrl = qrisData?.qr_image_url || (isSumopod ? null : qrisData?.qris_url)
-  const qrValue = isSumopod ? (qrisData?.payment_code || qrisData?.payment_url || null) : null
+  // Saat demo sandbox, QR diarahkan ke halaman simulasi pembayaran milik aplikasi
+  // sendiri supaya pelanggan tetap punya halaman untuk menekan "bayar".
+  const qrValue = isSumopod
+    ? (qrisData?.simulation_url || qrisData?.payment_code || qrisData?.payment_url || null)
+    : null
   const hasQrisQr = Boolean(qrImageUrl || qrValue)
 
   const handleQrisMethodClick = () => {
@@ -110,9 +116,11 @@ export default function SalesPaymentModal({
                   </div>
                 )}
                 <p className="qris-app-note">
-                  {isSumopod && !qrisData?.payment_code && hasQrisQr
-                    ? 'QR di atas berisi tautan halaman pembayaran SumoPod. Bisa juga dibuka langsung lewat tombol di bawah.'
-                    : 'Satu QRIS ini dapat discan dari aplikasi pembayaran pelanggan yang mendukung QRIS.'}
+                  {qrisData?.simulation_url
+                    ? 'QR di atas menuju Halaman Simulasi Pembayaran. Pelanggan scan pakai kamera HP, lalu tekan tombol Bayar Sekarang di halaman itu.'
+                    : isSumopod && hasQrisQr
+                      ? 'QR di atas berisi tautan halaman pembayaran SumoPod. Bisa juga dibuka langsung lewat tombol di bawah.'
+                      : 'Satu QRIS ini dapat discan dari aplikasi pembayaran pelanggan yang mendukung QRIS.'}
                 </p>
               </div>
             </div>
@@ -129,23 +137,36 @@ export default function SalesPaymentModal({
               <span>
                 {isQrisPaid
                   ? 'Pembayaran diterima. Nota akan muncul otomatis.'
-                  : isSumopod && qrValue && !qrisData?.payment_code
-                    ? 'Scan QR, bayar di halaman SumoPod, lalu tekan "I have already paid" di halaman itu. Aplikasi mengecek status pembayaran otomatis setiap beberapa detik, jadi status akan berubah hijau begitu SumoPod menerima pembayaran.'
-                    : 'Scan QRIS menggunakan GoPay, ShopeePay, mobile banking, atau e-wallet lain yang mendukung QRIS. Sistem akan menyimpan transaksi otomatis setelah pembayaran berhasil.'}
+                  : qrisData?.simulation_url
+                    ? 'Pelanggan scan QR dengan kamera HP, lalu tekan tombol Bayar Sekarang di halaman simulasi. Status di layar ini berubah hijau otomatis dan nota tersimpan sendiri.'
+                    : isSumopod && qrValue && !qrisData?.payment_code
+                      ? 'Scan QR, bayar di halaman SumoPod, lalu tekan "I have already paid" di halaman itu. Aplikasi mengecek status pembayaran otomatis setiap beberapa detik, jadi status akan berubah hijau begitu SumoPod menerima pembayaran.'
+                      : 'Scan QRIS menggunakan GoPay, ShopeePay, mobile banking, atau e-wallet lain yang mendukung QRIS. Sistem akan menyimpan transaksi otomatis setelah pembayaran berhasil.'}
               </span>
             </div>
             <button type="button" onClick={onCreateQris} disabled={qrisLoading} className="secondary-button">
               {qrisLoading ? 'Memuat QRIS...' : 'Buat Ulang QRIS'}
             </button>
             {isSumopod ? (
-              <>
-                <button type="button" onClick={onOpenPaymentPage} disabled={!qrisData?.payment_url} className="secondary-button">
-                  Buka Halaman Pembayaran
-                </button>
-                <button type="button" onClick={onCopyQrisUrl} disabled={!qrisData?.payment_url} className="secondary-button">
-                  Salin Link Pembayaran
-                </button>
-              </>
+              qrisData?.simulation_url ? (
+                <>
+                  <button type="button" onClick={onOpenSimulationPage} className="secondary-button">
+                    Buka Halaman Simulasi
+                  </button>
+                  <button type="button" onClick={onCopySimulationLink} className="secondary-button">
+                    Salin Link Simulasi
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button type="button" onClick={onOpenPaymentPage} disabled={!qrisData?.payment_url} className="secondary-button">
+                    Buka Halaman Pembayaran
+                  </button>
+                  <button type="button" onClick={onCopyQrisUrl} disabled={!qrisData?.payment_url} className="secondary-button">
+                    Salin Link Pembayaran
+                  </button>
+                </>
+              )
             ) : (
               <>
                 <button type="button" onClick={onCopyQrisUrl} disabled={!qrisData?.qris_url} className="secondary-button">

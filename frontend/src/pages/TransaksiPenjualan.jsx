@@ -57,7 +57,7 @@ export default function TransaksiPenjualan() {
 
     const interval = window.setInterval(() => {
       checkQrisStatus(false)
-    }, 5000)
+    }, 2000)
 
     return () => window.clearInterval(interval)
   }, [paymentMethod, qrisData?.order_id, qrisStatus])
@@ -121,6 +121,21 @@ export default function TransaksiPenjualan() {
       toast.success('URL QRIS disalin')
     } catch (e) {
       toast.error('Gagal menyalin URL QRIS')
+    }
+  }
+  const openSimulationPage = () => {
+    const url = qrisData?.simulation_url
+    if (!url) return toast.error('Halaman simulasi belum tersedia')
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+  const copySimulationLink = async () => {
+    const url = qrisData?.simulation_url
+    if (!url) return toast.error('Halaman simulasi belum tersedia')
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link halaman simulasi disalin')
+    } catch (e) {
+      toast.error('Gagal menyalin link simulasi')
     }
   }
 
@@ -506,6 +521,8 @@ export default function TransaksiPenjualan() {
         onManualConfirm={manualConfirmQris}
         manualConfirming={manualConfirming}
         formatQrisStatus={formatQrisStatus}
+        onOpenSimulationPage={openSimulationPage}
+        onCopySimulationLink={copySimulationLink}
       />
 
       <SalesReceiptModal

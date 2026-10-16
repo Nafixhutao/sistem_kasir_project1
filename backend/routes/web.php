@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SimulasiPembayaranController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,13 @@ Route::get('/', function () {
 
     return view('welcome');
 });
+
+// Halaman simulasi pembayaran (demo sandbox). Harus didaftarkan sebelum rute
+// penangkap SPA di bawah, supaya tidak ikut diarahkan ke aplikasi kasir.
+Route::get('/bayar-simulasi/{orderId}', [SimulasiPembayaranController::class, 'show'])
+    ->name('simulasi.bayar');
+Route::post('/bayar-simulasi/{orderId}', [SimulasiPembayaranController::class, 'bayar'])
+    ->name('simulasi.bayar.proses');
 
 Route::get('/{any}', function () {
     $frontend = public_path('app/index.html');

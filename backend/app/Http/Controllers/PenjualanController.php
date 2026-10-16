@@ -207,6 +207,25 @@ class PenjualanController extends Controller
      * SumoPod Managed Payment: pembuatan pembayaran dicatat lebih dulu dengan status
      * pending, lalu webhook payment.completed menandainya lunas.
      */
+    /**
+     * Alamat halaman simulasi pembayaran yang dipakai sebagai isi QR selama mode
+     * demo sandbox. Dikosongkan bila flag konfirmasi manual dimatikan atau provider
+     * sudah bukan sandbox, supaya QR tidak pernah mengarah ke simulasi saat
+     * pembayaran sungguhan sudah aktif.
+     */
+    private function simulasiBayarUrl(string $orderId): ?string
+    {
+        if (!config('services.sumopod.allow_manual_confirm', false)) {
+            return null;
+        }
+
+        if (!str_contains((string) config('services.sumopod.base_url'), 'sandbox')) {
+            return null;
+        }
+
+        return rtrim(config('app.url'), '/') . '/bayar-simulasi/' . urlencode($orderId);
+    }
+
     private function createSumopodQris($items, $totalHarga)
     {
         $apiKey = config('services.sumopod.api_key');
@@ -270,6 +289,7 @@ class PenjualanController extends Controller
             'fee' => $body['fee'] ?? null,
             'net_amount' => $body['net_amount'] ?? null,
             'allow_manual_confirm' => (bool) config('services.sumopod.allow_manual_confirm', false),
+            'simulation_url' => $this->simulasiBayarUrl($orderId),
             'sumopod' => $body,
         ]);
     }

@@ -44,7 +44,9 @@ return [
         'webhook_token' => env('SUMOPOD_WEBHOOK_TOKEN'),
         'webhook_secret' => env('SUMOPOD_WEBHOOK_SECRET'),
         // Hanya untuk sandbox: mengizinkan kasir menandai pembayaran lunas
-        // secara manual bila webhook tidak bisa dipicu dari dashboard.
+        // secara manual dan mengaktifkan halaman /bayar-simulasi agar pelanggan
+        // bisa menekan "Bayar Sekarang" sendiri saat demo. Matikan (false) sebelum
+        // dipakai menerima pembayaran sungguhan.
         'allow_manual_confirm' => env('SUMOPOD_ALLOW_MANUAL_CONFIRM', false),
     ],
 
