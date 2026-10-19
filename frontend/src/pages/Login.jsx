@@ -147,7 +147,7 @@ export default function Login() {
             <div className="login-divider"><span>atau</span></div>
             <div className="login-admin-note">
               <ShieldCheck size={18} />
-              <span>Hanya admin yang dapat mengakses sistem.</span>
+              <span>Akses khusus kasir &amp; admin Sultan Cell.</span>
             </div>
           </form>
 
