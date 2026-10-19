@@ -7,7 +7,6 @@ use App\Models\TransaksiPenjualan;
 use App\Models\DetailPenjualan;
 use App\Models\Barang;
 use App\Models\ActivityLog;
-use App\Models\ReturPenjualan;
 use App\Models\ReturPelanggan;
 use App\Models\PembayaranQris;
 use Carbon\Carbon;
@@ -431,9 +430,7 @@ class PenjualanController extends Controller
             foreach ($transaksi->details as $detail) {
                 $barang = Barang::lockForUpdate()->find($detail->barang_id);
                 if ($barang) {
-                    $jumlahReturLama = ReturPenjualan::where('detail_penjualan_id', $detail->id)->sum('jumlah');
-                    $jumlahReturPelanggan = ReturPelanggan::where('detail_penjualan_id', $detail->id)->sum('jumlah_retur');
-                    $jumlahRetur = (int) $jumlahReturLama + (int) $jumlahReturPelanggan;
+                    $jumlahRetur = (int) ReturPelanggan::where('detail_penjualan_id', $detail->id)->sum('jumlah_retur');
                     $jumlahKembali = max((int) $detail->jumlah - (int) $jumlahRetur, 0);
                     $barang->stok += $jumlahKembali;
                     $barang->save();
@@ -506,9 +503,7 @@ class PenjualanController extends Controller
                 abort(422, 'Jumlah retur melebihi jumlah pembelian.');
             }
 
-            $jumlahReturLama = ReturPenjualan::where('detail_penjualan_id', $detail->id)->sum('jumlah');
-            $jumlahReturPelanggan = ReturPelanggan::where('detail_penjualan_id', $detail->id)->sum('jumlah_retur');
-            $jumlahSudahRetur = (int) $jumlahReturLama + (int) $jumlahReturPelanggan;
+            $jumlahSudahRetur = (int) ReturPelanggan::where('detail_penjualan_id', $detail->id)->sum('jumlah_retur');
             $sisaBisaRetur = (int) $detail->jumlah - (int) $jumlahSudahRetur;
 
             if ((int) $data['jumlah'] > $sisaBisaRetur) {

@@ -13,8 +13,10 @@ final class BusinessBackup
         'transaksi_transfer', 'transaksi_tarik_tunai', 'transaksi_setor_tunai',
         'pembayaran_tagihan', 'transaksi_pulsa', 'transaksi_ewallet', 'biaya_admin',
         'biaya_admin_brilink', 'providers', 'activity_logs', 'pengeluaran_toko',
-        'retur_penjualan', 'retur_pelanggan', 'retur_supplier', 'idempotency_records',
+        'retur_pelanggan', 'retur_supplier', 'idempotency_records',
     ];
+    /** Tabel versi lama yang sudah dihapus dari skema; masih boleh ada di file backup lama dan diabaikan saat restore. */
+    private const LEGACY_TABLES = ['retur_penjualan'];
     private const OPTIONAL = ['suppliers', 'retur_supplier', 'retur_pelanggan', 'providers', 'idempotency_records'];
 
     public static function metadata(): array
@@ -45,7 +47,7 @@ final class BusinessBackup
         if (($backup['app'] ?? null) !== 'Sultan Cell' || !is_string($backup['backup_at'] ?? null)
             || strtotime($backup['backup_at']) === false || !is_array($backup['tables'] ?? null)) self::invalid('Format backup tidak valid.');
         [$columns, $foreign, $indexes] = self::metadata();
-        $tables = $backup['tables'];
+        $tables = array_diff_key($backup['tables'], array_fill_keys(self::LEGACY_TABLES, null));
         if (array_diff(array_keys($tables), array_keys($columns))) self::invalid('Backup memuat tabel yang tidak diizinkan.');
         $missing = array_diff(array_keys($columns), array_keys($tables), self::OPTIONAL);
         if ($missing) self::invalid('File backup tidak lengkap: '.implode(', ', $missing).'.');
