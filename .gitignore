@@ -56,3 +56,6 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Hasil build frontend (dibuat ulang saat Docker build)
+backend/public/app/
