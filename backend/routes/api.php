@@ -27,6 +27,7 @@ foreach (['id', 'barang', 'supplier', 'transfer', 'tarik_tunai', 'setor_tunai', 
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
+Route::post('/lupa-password', [AuthController::class, 'lupaPassword'])->middleware('throttle:login');
 Route::post('/midtrans/notification', [PenjualanController::class, 'qrisWebhook']);
 Route::post('/sumopod/webhook', [PenjualanController::class, 'sumopodWebhook']);
 

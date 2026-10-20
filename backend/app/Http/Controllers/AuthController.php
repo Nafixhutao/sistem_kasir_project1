@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\PasswordManagement;
 use App\Support\PasswordPolicy;
@@ -53,6 +54,44 @@ class AuthController extends Controller
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logout berhasil']);
+    }
+
+    /**
+     * Reset mandiri lewat halaman login: pengguna lupa password membuat password baru,
+     * diotorisasi oleh password admin (pemilik toko). Tidak perlu login.
+     */
+    public function lupaPassword(Request $request)
+    {
+        $data = $request->validate([
+            'username' => 'required|string|max:50',
+            'password' => PasswordPolicy::rules(),
+            'password_confirmation' => 'required|string',
+            'admin_password' => 'required|string',
+        ], [
+            'admin_password.required' => 'Password admin wajib diisi sebagai otorisasi reset.',
+        ]);
+
+        $target = User::where('username', $data['username'])->first();
+        if (!$target || !$target->is_active) {
+            throw ValidationException::withMessages(['username' => 'Akun tidak ditemukan atau tidak aktif.']);
+        }
+
+        $admin = User::where('role', 'admin')->where('is_active', true)->orderBy('id')->first();
+        if (!$admin || !Hash::check($data['admin_password'], $admin->password)) {
+            throw ValidationException::withMessages(['admin_password' => 'Password admin tidak cocok. Reset password dibatalkan.']);
+        }
+
+        if (Hash::check($data['password'], $target->password)) {
+            throw ValidationException::withMessages(['password' => 'Password baru harus berbeda dari yang lama.']);
+        }
+
+        $target->password = Hash::make($data['password']);
+        $target->save();
+        $target->tokens()->delete();
+
+        ActivityLog::record('Auth', 'lupa-password', "Reset password akun {$target->username} dengan otorisasi admin");
+
+        return response()->json(['message' => 'Password berhasil dibuat ulang. Silakan login dengan password baru.']);
     }
 
     public function me(Request $request)

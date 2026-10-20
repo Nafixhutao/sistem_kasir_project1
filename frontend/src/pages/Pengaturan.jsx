@@ -3,7 +3,6 @@ import { Activity, DatabaseBackup, Download, Search, Settings, Upload } from 'lu
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
-import ChangePasswordForm from '../components/Auth/ChangePasswordForm'
 import { formatDateTime } from '../utils/formatDateTime'
 
 export default function Pengaturan() {
@@ -97,9 +96,6 @@ export default function Pengaturan() {
         {canWrite && <button type="button" className={activeTab === 'backup' ? 'active' : ''} onClick={() => setActiveTab('backup')}>
           <DatabaseBackup size={18} /> Backup Data
         </button>}
-        <button type="button" className={activeTab === 'password' ? 'active' : ''} onClick={() => setActiveTab('password')}>
-          <Settings size={18} /> Ubah Password
-        </button>
       </div>
 
       {activeTab === 'aktivitas' ? (
@@ -128,7 +124,7 @@ export default function Pengaturan() {
             </div>
           </section>
         </>
-      ) : activeTab === 'password' ? <ChangePasswordForm /> : (
+      ) : (
         <div className="settings-backup-grid">
           <section className="brilink-form-card settings-backup-card">
             <div className="brilink-section-title"><DatabaseBackup size={22} /><div><h2>Backup JSON</h2><p>Simpan file backup di flashdisk atau cloud agar data toko punya cadangan.</p></div></div>
