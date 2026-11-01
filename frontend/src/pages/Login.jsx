@@ -150,12 +150,18 @@ export default function Login() {
       <section className="login-form-panel" aria-label="Form login">
         <div className="login-card">
           <div className="login-welcome">
-            <h2>Selamat Datang!</h2>
-            <p>Silakan masuk untuk membuka dashboard operasional.</p>
+            <h2>{mode === 'lupa' ? 'Buat Password Baru' : 'Selamat Datang!'}</h2>
+            <p>{mode === 'lupa' ? 'Isi username dan password baru akun Anda di bawah ini.' : 'Silakan masuk untuk membuka dashboard operasional.'}</p>
           </div>
 
           <form onSubmit={mode === 'lupa' ? handleLupaPassword : handleSubmit} className="login-form" noValidate>
             {error && <div className={`form-error animate-fadeIn ${messageType === 'success' ? 'success' : ''}`}>{error}</div>}
+            {mode === 'lupa' && (
+              <div className="login-admin-note">
+                <KeyRound size={18} />
+                <span>Buat password baru cukup dengan <strong>kode pemulihan toko</strong> yang dipegang pemilik. Tidak perlu masuk ke halaman Pengaturan.</span>
+              </div>
+            )}
             <label className="field-group">
               <span>Username</span>
               <div className={`input-with-icon ${usernameError ? 'has-error' : ''}`}>
@@ -167,10 +173,6 @@ export default function Login() {
 
               {mode === 'lupa' ? (
                 <>
-                  <div className="login-admin-note">
-                    <KeyRound size={18} />
-                    <span>Buat password baru cukup dengan <strong>kode pemulihan toko</strong> yang dipegang pemilik. Tidak perlu masuk ke halaman Pengaturan.</span>
-                  </div>
                   <label className="field-group">
                     <span>Password Baru</span>
                     <div className="password-field input-with-icon">
@@ -198,12 +200,12 @@ export default function Login() {
                       </button>
                     </div>
                   </label>
-                  <div className="login-options">
-                    <button type="button" onClick={backToLogin}><ArrowLeft size={14} style={{ verticalAlign: '-2px' }} /> Kembali ke login</button>
-                  </div>
                   <button type="submit" disabled={lupaLoading} className="primary-login-button">
                     <KeyRound size={19} />
                     {lupaLoading ? 'Memproses...' : 'Buat Password Baru'}
+                  </button>
+                  <button type="button" className="login-back-link" onClick={backToLogin}>
+                    <ArrowLeft size={15} /> Kembali ke halaman login
                   </button>
                 </>
               ) : (
