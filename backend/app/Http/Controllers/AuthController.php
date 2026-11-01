@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use App\Models\User;
 use App\Services\PasswordManagement;
+use App\Support\Captcha;
 use App\Support\PasswordPolicy;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -18,7 +19,16 @@ class AuthController extends Controller
         $data = $request->validate([
             'username' => 'required|string|max:50',
             'password' => 'required|string',
+            'captcha_token' => 'required|string|max:512',
+            'captcha_answer' => 'required|string|max:12',
+        ], [
+            'captcha_token.required' => 'CAPTCHA kedaluwarsa. Muat ulang halaman.',
+            'captcha_answer.required' => 'Kode CAPTCHA wajib diisi.',
         ]);
+
+        if (!Captcha::verify($data['captcha_token'], $data['captcha_answer'])) {
+            throw ValidationException::withMessages(['captcha_answer' => 'Kode CAPTCHA salah atau sudah kedaluwarsa.']);
+        }
 
         return DB::transaction(function () use ($data) {
             $user = User::where('username', $data['username'])->lockForUpdate()->first();
@@ -67,9 +77,16 @@ class AuthController extends Controller
             'password' => PasswordPolicy::rules(),
             'password_confirmation' => 'required|string',
             'recovery_code' => 'required|string|max:64',
+            'captcha_token' => 'required|string|max:512',
+            'captcha_answer' => 'required|string|max:12',
         ], [
             'recovery_code.required' => 'Kode pemulihan wajib diisi sebagai otorisasi reset.',
+            'captcha_answer.required' => 'Kode CAPTCHA wajib diisi.',
         ]);
+
+        if (!Captcha::verify($data['captcha_token'], $data['captcha_answer'])) {
+            throw ValidationException::withMessages(['captcha_answer' => 'Kode CAPTCHA salah atau sudah kedaluwarsa.']);
+        }
 
         $target = User::where('username', $data['username'])->first();
         if (!$target || !$target->is_active) {

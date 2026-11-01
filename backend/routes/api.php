@@ -20,12 +20,14 @@ use App\Http\Controllers\PengeluaranTokoController;
 use App\Http\Controllers\ReturSupplierController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\CaptchaController;
 
 foreach (['id', 'barang', 'supplier', 'transfer', 'tarik_tunai', 'setor_tunai', 'tagihan', 'pulsa', 'ewallet', 'pengeluaran_toko', 'retur_supplier'] as $parameter) {
     Route::pattern($parameter, '[0-9]+');
 }
 
 // Public routes
+Route::get('/captcha', [CaptchaController::class, 'show'])->middleware('throttle:60,1');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/lupa-password', [AuthController::class, 'lupaPassword'])->middleware('throttle:login');
 Route::post('/midtrans/notification', [PenjualanController::class, 'qrisWebhook']);
