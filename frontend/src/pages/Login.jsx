@@ -19,9 +19,9 @@ export default function Login() {
   const [mode, setMode] = useState('login')
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordConfirmation, setNewPasswordConfirmation] = useState('')
-  const [adminPassword, setAdminPassword] = useState('')
+  const [recoveryCode, setRecoveryCode] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showAdminPassword, setShowAdminPassword] = useState(false)
+  const [showRecoveryCode, setShowRecoveryCode] = useState(false)
   const [lupaLoading, setLupaLoading] = useState(false)
 
   const handleSubmit = async (e) => {
@@ -57,7 +57,7 @@ export default function Login() {
     setMessageType('error')
     setNewPassword('')
     setNewPasswordConfirmation('')
-    setAdminPassword('')
+    setRecoveryCode('')
   }
 
   const handleLupaPassword = async (e) => {
@@ -69,14 +69,14 @@ export default function Login() {
     if (!username.trim()) { setError('Username wajib diisi.'); setLupaLoading(false); return }
     if (!newPassword) { setError('Password baru wajib diisi.'); setLupaLoading(false); return }
     if (newPassword !== newPasswordConfirmation) { setError('Konfirmasi password baru tidak cocok.'); setLupaLoading(false); return }
-    if (!adminPassword) { setError('Password admin wajib diisi sebagai otorisasi reset.'); setLupaLoading(false); return }
+    if (!recoveryCode.trim()) { setError('Kode pemulihan wajib diisi sebagai otorisasi reset.'); setLupaLoading(false); return }
 
     try {
       const res = await api.post('/lupa-password', {
         username,
         password: newPassword,
         password_confirmation: newPasswordConfirmation,
-        admin_password: adminPassword,
+        recovery_code: recoveryCode,
       })
       backToLogin()
       setError(res.data.message)
@@ -169,7 +169,7 @@ export default function Login() {
                 <>
                   <div className="login-admin-note">
                     <KeyRound size={18} />
-                    <span>Buat password baru: isi username akun Anda, lalu minta pemilik toko memasukkan password admin sebagai otorisasi.</span>
+                    <span>Buat password baru cukup dengan <strong>kode pemulihan toko</strong> yang dipegang pemilik. Tidak perlu masuk ke halaman Pengaturan.</span>
                   </div>
                   <label className="field-group">
                     <span>Password Baru</span>
@@ -189,12 +189,12 @@ export default function Login() {
                     </div>
                   </label>
                   <label className="field-group">
-                    <span>Password Admin (Otorisasi)</span>
+                    <span>Kode Pemulihan Toko</span>
                     <div className="password-field input-with-icon">
                       <ShieldCheck size={19} />
-                      <input type={showAdminPassword ? 'text' : 'password'} value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Masukkan password admin" required />
-                      <button type="button" onClick={() => setShowAdminPassword(!showAdminPassword)} aria-label={showAdminPassword ? 'Sembunyikan password admin' : 'Tampilkan password admin'}>
-                        {showAdminPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                      <input type={showRecoveryCode ? 'text' : 'password'} value={recoveryCode} onChange={e => setRecoveryCode(e.target.value)} placeholder="Contoh: SC-7K3F-92QX" required autoComplete="off" spellCheck={false} />
+                      <button type="button" onClick={() => setShowRecoveryCode(!showRecoveryCode)} aria-label={showRecoveryCode ? 'Sembunyikan kode pemulihan' : 'Tampilkan kode pemulihan'}>
+                        {showRecoveryCode ? <EyeOff size={19} /> : <Eye size={19} />}
                       </button>
                     </div>
                   </label>
@@ -232,11 +232,15 @@ export default function Login() {
                   </button>
                 </>
               )}
-            <div className="login-divider"><span>atau</span></div>
-            <div className="login-admin-note">
-              <ShieldCheck size={18} />
-              <span>Akses khusus kasir &amp; admin Sultan Cell.</span>
-            </div>
+            {mode !== 'lupa' && (
+              <>
+                <div className="login-divider"><span>atau</span></div>
+                <div className="login-admin-note">
+                  <ShieldCheck size={18} />
+                  <span>Akses khusus kasir &amp; admin Sultan Cell.</span>
+                </div>
+              </>
+            )}
           </form>
 
         </div>

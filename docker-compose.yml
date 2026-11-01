@@ -52,6 +52,7 @@ services:
       SUMOPOD_WEBHOOK_TOKEN: ${SUMOPOD_WEBHOOK_TOKEN:-}
       SUMOPOD_WEBHOOK_SECRET: ${SUMOPOD_WEBHOOK_SECRET:-}
       SUMOPOD_ALLOW_MANUAL_CONFIRM: ${SUMOPOD_ALLOW_MANUAL_CONFIRM:-false}
+      RECOVERY_CODE_HASH: ${RECOVERY_CODE_HASH:-}
     volumes:
       - app_storage:/var/www/html/storage
     ports:

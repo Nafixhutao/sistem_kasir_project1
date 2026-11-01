@@ -55,4 +55,10 @@ return [
         'provider' => env('PAYMENT_PROVIDER', 'midtrans'),
     ],
 
+    // Kode pemulihan pemilik toko untuk reset password lewat halaman login.
+    // Yang disimpan hanya hash-nya (bcrypt), kode aslinya dipegang pemilik toko.
+    'recovery' => [
+        'code_hash' => env('RECOVERY_CODE_HASH'),
+    ],
+
 ];
