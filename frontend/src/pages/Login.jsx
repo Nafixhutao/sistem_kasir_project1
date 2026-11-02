@@ -19,9 +19,7 @@ export default function Login() {
   const [mode, setMode] = useState('login')
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordConfirmation, setNewPasswordConfirmation] = useState('')
-  const [recoveryCode, setRecoveryCode] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showRecoveryCode, setShowRecoveryCode] = useState(false)
   const [lupaLoading, setLupaLoading] = useState(false)
   const [captcha, setCaptcha] = useState(null)
   const [captchaAnswer, setCaptchaAnswer] = useState('')
@@ -75,7 +73,6 @@ export default function Login() {
     setMessageType('error')
     setNewPassword('')
     setNewPasswordConfirmation('')
-    setRecoveryCode('')
     setCaptcha(null)
     setCaptchaAnswer('')
     setCaptchaError('')
@@ -90,7 +87,6 @@ export default function Login() {
     if (!username.trim()) { setError('Username wajib diisi.'); setLupaLoading(false); return }
     if (!newPassword) { setError('Password baru wajib diisi.'); setLupaLoading(false); return }
     if (newPassword !== newPasswordConfirmation) { setError('Konfirmasi password baru tidak cocok.'); setLupaLoading(false); return }
-    if (!recoveryCode.trim()) { setError('Kode pemulihan wajib diisi sebagai otorisasi reset.'); setLupaLoading(false); return }
     if (!captchaAnswer.trim()) { setError('Kode CAPTCHA wajib diisi.'); setLupaLoading(false); return }
 
     try {
@@ -98,7 +94,6 @@ export default function Login() {
         username,
         password: newPassword,
         password_confirmation: newPasswordConfirmation,
-        recovery_code: recoveryCode,
         captcha_token: captcha?.token,
         captcha_answer: captchaAnswer,
       })
@@ -184,7 +179,7 @@ export default function Login() {
             {mode === 'lupa' && (
               <div className="login-admin-note">
                 <KeyRound size={18} />
-                <span>Buat password baru cukup dengan <strong>kode pemulihan toko</strong> yang dipegang pemilik. Tidak perlu masuk ke halaman Pengaturan.</span>
+                <span>Buat password baru dengan mengisi username akun Anda. Tidak perlu masuk ke halaman Pengaturan.</span>
               </div>
             )}
             <label className="field-group">
@@ -213,16 +208,6 @@ export default function Login() {
                     <div className="password-field input-with-icon">
                       <LockKeyhole size={19} />
                       <input type={showNewPassword ? 'text' : 'password'} value={newPasswordConfirmation} onChange={e => setNewPasswordConfirmation(e.target.value)} placeholder="Ulangi password baru" required />
-                    </div>
-                  </label>
-                  <label className="field-group">
-                    <span>Kode Pemulihan Toko</span>
-                    <div className="password-field input-with-icon">
-                      <ShieldCheck size={19} />
-                      <input type={showRecoveryCode ? 'text' : 'password'} value={recoveryCode} onChange={e => setRecoveryCode(e.target.value)} placeholder="Contoh: SC-7K3F-92QX" required autoComplete="off" spellCheck={false} />
-                      <button type="button" onClick={() => setShowRecoveryCode(!showRecoveryCode)} aria-label={showRecoveryCode ? 'Sembunyikan kode pemulihan' : 'Tampilkan kode pemulihan'}>
-                        {showRecoveryCode ? <EyeOff size={19} /> : <Eye size={19} />}
-                      </button>
                     </div>
                   </label>
                   <div className="captcha-block">

@@ -58,8 +58,8 @@ class AuthController extends Controller
     }
 
     /**
-     * Reset mandiri lewat halaman login: pengguna lupa password membuat password baru,
-     * diotorisasi oleh kode pemulihan toko yang hanya dipegang pemilik. Tidak perlu login.
+     * Reset mandiri lewat halaman login: pengguna lupa password membuat password baru
+     * tanpa perlu login. Dilindungi CAPTCHA dan pembatasan percobaan (throttle).
      */
     public function lupaPassword(Request $request)
     {
@@ -67,11 +67,9 @@ class AuthController extends Controller
             'username' => 'required|string|max:50',
             'password' => PasswordPolicy::rules(),
             'password_confirmation' => 'required|string',
-            'recovery_code' => 'required|string|max:64',
             'captcha_token' => 'required|string|max:512',
             'captcha_answer' => 'required|string|max:12',
         ], [
-            'recovery_code.required' => 'Kode pemulihan wajib diisi sebagai otorisasi reset.',
             'captcha_token.required' => 'CAPTCHA kedaluwarsa. Muat ulang halaman lalu coba lagi.',
             'captcha_answer.required' => 'Kode CAPTCHA wajib diisi.',
         ]);
@@ -85,25 +83,6 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['username' => 'Akun tidak ditemukan atau tidak aktif.']);
         }
 
-        $hash = config('services.recovery.code_hash');
-        if (!$hash) {
-            throw ValidationException::withMessages(['recovery_code' => 'Kode pemulihan belum diatur di server. Hubungi pengelola sistem.']);
-        }
-
-        // Kode dinormalisasi: huruf besar dan tanda hubung diabaikan supaya tidak gagal
-        // hanya karena pemilik toko mengetik tanpa tanda hubung atau huruf kecil.
-        $submitted = preg_replace('/[^A-Z0-9]/', '', strtoupper($data['recovery_code']));
-        $candidates = [$data['recovery_code'], $submitted, strtoupper($data['recovery_code'])];
-
-        $valid = false;
-        foreach ($candidates as $candidate) {
-            if ($candidate !== '' && Hash::check($candidate, $hash)) { $valid = true; break; }
-        }
-
-        if (!$valid) {
-            throw ValidationException::withMessages(['recovery_code' => 'Kode pemulihan tidak cocok. Reset password dibatalkan.']);
-        }
-
         if (Hash::check($data['password'], $target->password)) {
             throw ValidationException::withMessages(['password' => 'Password baru harus berbeda dari yang lama.']);
         }
@@ -112,7 +91,7 @@ class AuthController extends Controller
         $target->save();
         $target->tokens()->delete();
 
-        ActivityLog::record('Auth', 'lupa-password', "Reset password akun {$target->username} dengan kode pemulihan toko");
+        ActivityLog::record('Auth', 'lupa-password', "Reset password akun {$target->username} lewat halaman login");
 
         return response()->json(['message' => 'Password berhasil dibuat ulang. Silakan login dengan password baru.']);
     }
