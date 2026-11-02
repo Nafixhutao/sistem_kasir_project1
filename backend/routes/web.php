@@ -14,14 +14,29 @@ use App\Http\Controllers\SimulasiPembayaranController;
 |
 */
 
-Route::get('/', function () {
+/**
+ * Mengirim index.html aplikasi kasir.
+ *
+ * HTML sengaja dikirim dengan no-store supaya browser selalu mengambil versi
+ * terbaru. Nama berkas aset (index-xxxx.js) sudah ber-hash, jadi cache aset
+ * tetap aman; yang tidak boleh di-cache hanya HTML-nya. Tanpa ini, setelah
+ * deploy pengguna bisa tetap melihat tampilan lama sampai cache kedaluwarsa.
+ */
+$kirimAplikasi = function () {
     $frontend = public_path('app/index.html');
 
-    if (file_exists($frontend)) {
-        return response()->file($frontend);
+    if (!file_exists($frontend)) {
+        return null;
     }
 
-    return view('welcome');
+    return response()->file($frontend, [
+        'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma' => 'no-cache',
+    ]);
+};
+
+Route::get('/', function () use ($kirimAplikasi) {
+    return $kirimAplikasi() ?? view('welcome');
 });
 
 // Halaman simulasi pembayaran (demo sandbox). Harus didaftarkan sebelum rute
@@ -31,12 +46,12 @@ Route::get('/bayar-simulasi/{orderId}', [SimulasiPembayaranController::class, 's
 Route::post('/bayar-simulasi/{orderId}', [SimulasiPembayaranController::class, 'bayar'])
     ->name('simulasi.bayar.proses');
 
-Route::get('/{any}', function () {
-    $frontend = public_path('app/index.html');
+Route::get('/{any}', function () use ($kirimAplikasi) {
+    $response = $kirimAplikasi();
 
-    if (!file_exists($frontend)) {
+    if (!$response) {
         abort(404, 'Frontend belum dibuild. Jalankan npm run build di folder frontend.');
     }
 
-    return response()->file($frontend);
+    return $response;
 })->where('any', '^(?!api).*$');
