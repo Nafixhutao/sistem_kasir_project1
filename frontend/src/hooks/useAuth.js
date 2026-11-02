@@ -39,9 +39,9 @@ export function AuthProvider({ children }) {
     }
   }, [token])
 
-  const login = async (username, password, captcha = {}) => {
+  const login = async (username, password) => {
     try {
-      const res = await api.post('/login', { username, password, ...captcha })
+      const res = await api.post('/login', { username, password })
       localStorage.setItem('token', res.data.token)
       setToken(res.data.token)
       setUser(res.data.user)

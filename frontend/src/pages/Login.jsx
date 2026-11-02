@@ -39,7 +39,8 @@ export default function Login() {
     }
   }, [])
 
-  useEffect(() => { loadCaptcha() }, [loadCaptcha, mode])
+  // CAPTCHA hanya diperlukan pada mode lupa password, jadi baru dimuat saat mode itu dibuka.
+  useEffect(() => { if (mode === 'lupa') loadCaptcha() }, [loadCaptcha, mode])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -61,19 +62,9 @@ export default function Login() {
       return
     }
 
-    if (!captchaAnswer.trim()) {
-      setCaptchaError('Kode CAPTCHA wajib diisi.')
-      setLoading(false)
-      return
-    }
-
-    const result = await login(username, password, {
-      captcha_token: captcha?.token,
-      captcha_answer: captchaAnswer,
-    })
+    const result = await login(username, password)
     if (!result.success) {
       setError(result.message)
-      loadCaptcha()
     }
     setLoading(false)
   }
@@ -85,6 +76,9 @@ export default function Login() {
     setNewPassword('')
     setNewPasswordConfirmation('')
     setRecoveryCode('')
+    setCaptcha(null)
+    setCaptchaAnswer('')
+    setCaptchaError('')
   }
 
   const handleLupaPassword = async (e) => {
@@ -286,34 +280,6 @@ export default function Login() {
                       <span>Ingat saya</span>
                     </label>
                     <button type="button" onClick={handleForgotPassword}>Lupa password?</button>
-                  </div>
-                  <div className="captcha-block">
-                    <div className="captcha-head">
-                      <span>Verifikasi Keamanan</span>
-                      <button type="button" className="captcha-refresh" onClick={loadCaptcha} disabled={loading}>
-                        <RefreshCw size={13} /> Ganti
-                      </button>
-                    </div>
-                    <div className="captcha-body">
-                      {captcha?.image ? (
-                        <img src={captcha.image} alt="CAPTCHA" className="captcha-image" onClick={loadCaptcha} title="Klik untuk ganti kode" />
-                      ) : (
-                        <div className="captcha-image captcha-image-empty">Memuat…</div>
-                      )}
-                      <input
-                        type="text"
-                        className={`captcha-input ${captchaError ? 'has-error' : ''}`}
-                        value={captchaAnswer}
-                        onChange={e => { setCaptchaAnswer(e.target.value.toUpperCase()); setCaptchaError('') }}
-                        placeholder="Ketik kode"
-                        maxLength={8}
-                        autoComplete="off"
-                        spellCheck={false}
-                        required
-                      />
-                    </div>
-                    <p className="captcha-hint">Ketik 5 karakter pada gambar (huruf besar/kecil sama saja).</p>
-                    {captchaError && <p className="field-warning animate-fadeIn">{captchaError}</p>}
                   </div>
                   <button type="submit" disabled={loading} className="primary-login-button">
                     <LogIn size={19} />

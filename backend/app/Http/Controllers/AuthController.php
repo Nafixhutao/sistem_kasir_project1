@@ -19,16 +19,7 @@ class AuthController extends Controller
         $data = $request->validate([
             'username' => 'required|string|max:50',
             'password' => 'required|string',
-            'captcha_token' => 'required|string|max:512',
-            'captcha_answer' => 'required|string|max:12',
-        ], [
-            'captcha_token.required' => 'CAPTCHA kedaluwarsa. Muat ulang halaman.',
-            'captcha_answer.required' => 'Kode CAPTCHA wajib diisi.',
         ]);
-
-        if (!Captcha::verify($data['captcha_token'], $data['captcha_answer'])) {
-            throw ValidationException::withMessages(['captcha_answer' => 'Kode CAPTCHA salah atau sudah kedaluwarsa.']);
-        }
 
         return DB::transaction(function () use ($data) {
             $user = User::where('username', $data['username'])->lockForUpdate()->first();
@@ -81,6 +72,7 @@ class AuthController extends Controller
             'captcha_answer' => 'required|string|max:12',
         ], [
             'recovery_code.required' => 'Kode pemulihan wajib diisi sebagai otorisasi reset.',
+            'captcha_token.required' => 'CAPTCHA kedaluwarsa. Muat ulang halaman lalu coba lagi.',
             'captcha_answer.required' => 'Kode CAPTCHA wajib diisi.',
         ]);
 
