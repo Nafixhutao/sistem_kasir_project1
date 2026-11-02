@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class Provider extends Model
+
+class Provider extends BaseModel
 {
     protected $fillable = [
         'nama_provider',
-        'is_active',
+        'aktif',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean',
+        'aktif' => 'boolean',
     ];
 
     public const DEFAULT_PROVIDERS = [
@@ -31,7 +31,7 @@ class Provider extends Model
         foreach (self::DEFAULT_PROVIDERS as $provider) {
             self::updateOrCreate(
                 ['nama_provider' => $provider],
-                ['is_active' => true]
+                ['aktif' => true]
             );
         }
     }

@@ -127,8 +127,8 @@ export default function Dashboard() {
           {data.aktivitas_terbaru.length === 0 ? <div className="empty-state"><p>Belum ada aktivitas</p><span>Aktivitas baru akan tampil setelah ada transaksi atau perubahan data.</span></div> : (
             <div className="list-stack">{data.aktivitas_terbaru.map(item => (
               <div key={item.id} className="transaction-row">
-                <div><p>{item.module} - {item.action}</p><span>{item.description}</span></div>
-                <strong>{new Date(item.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
+                <div><p>{item.modul} - {item.aksi}</p><span>{item.keterangan}</span></div>
+                <strong>{new Date(item.dibuat_pada).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</strong>
               </div>
             ))}</div>
           )}

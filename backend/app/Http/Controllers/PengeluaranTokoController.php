@@ -16,7 +16,7 @@ class PengeluaranTokoController extends Controller
             'kategori' => 'nullable|string|max:100',
         ]);
 
-        $query = PengeluaranToko::query()->orderBy('tanggal', 'desc')->orderBy('created_at', 'desc');
+        $query = PengeluaranToko::query()->orderBy('tanggal', 'desc')->orderBy('dibuat_pada', 'desc');
         if (!empty($filters['start_date']) && !empty($filters['end_date'])) {
             $query->whereBetween('tanggal', [$filters['start_date'], $filters['end_date']]);
         }

@@ -45,7 +45,7 @@ class ReturSupplierController extends Controller
                         ->orWhereRaw('LOWER(nama_barang) like ?', ["%{$search}%"]);
                 });
             })
-            ->orderBy('created_at', 'desc')
+            ->orderBy('dibuat_pada', 'desc')
             ->get();
 
         return response()->json($data);

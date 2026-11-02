@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class PembayaranQris extends Model
+
+class PembayaranQris extends BaseModel
 {
     protected $table = 'pembayaran_qris';
     protected $fillable = [
-        'order_id', 'provider', 'transaksi_penjualan_id', 'nominal',
+        'order_id', 'penyedia', 'transaksi_penjualan_id', 'nominal',
         'snap_token', 'payment_url', 'status_pembayaran', 'transaction_id',
         'payment_response', 'paid_at'
     ];

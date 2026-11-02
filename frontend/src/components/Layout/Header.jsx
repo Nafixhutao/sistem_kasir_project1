@@ -104,7 +104,7 @@ export default function Header({ user }) {
       if (notification.url) {
         setOpen(false)
         const ownerPaths = ['/dashboard','/barang','/data-supplier','/laporan-penjualan','/retur-supplier','/retur-barang-pelanggan','/pengeluaran-toko','/riwayat-brilink','/biaya-admin','/pengaturan','/manajemen-pengguna']
-        navigate(user?.role === 'admin' && !ownerPaths.includes(notification.url.split('?')[0]) ? '/dashboard' : notification.url)
+        navigate(user?.peran === 'admin' && !ownerPaths.includes(notification.url.split('?')[0]) ? '/dashboard' : notification.url)
       }
     } catch (err) {
       setError(getApiErrorMessage(err, 'Gagal menandai notifikasi.'))
@@ -193,7 +193,7 @@ export default function Header({ user }) {
                         <span className="notification-item-body">
                           <strong>{notification.judul}</strong>
                           <span>{notification.pesan}</span>
-                          <small>{relativeTime(notification.created_at)}</small>
+                          <small>{relativeTime(notification.dibuat_pada)}</small>
                         </span>
                         {unread && <span className="notification-unread-dot" aria-label="Belum dibaca"></span>}
                       </button>
@@ -209,8 +209,8 @@ export default function Header({ user }) {
             <User size={17} />
           </div>
           <div>
-            <p>{user?.name || 'Admin'}</p>
-            <span>{user?.role === 'admin' ? 'Admin' : 'Kasir'}</span>
+            <p>{user?.nama || 'Admin'}</p>
+            <span>{user?.peran === 'admin' ? 'Admin' : 'Kasir'}</span>
           </div>
         </div>
       </div>

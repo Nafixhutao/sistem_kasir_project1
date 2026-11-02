@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class PengeluaranToko extends Model
+
+class PengeluaranToko extends BaseModel
 {
     protected $table = 'pengeluaran_toko';
     protected $fillable = [

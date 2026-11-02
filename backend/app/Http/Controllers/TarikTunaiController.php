@@ -13,20 +13,20 @@ class TarikTunaiController extends Controller
 {
     public function index()
     {
-        return response()->json(TransaksiTarikTunai::orderBy('created_at', 'desc')->get());
+        return response()->json(TransaksiTarikTunai::orderBy('dibuat_pada', 'desc')->get());
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'nomor_rekening' => 'required|string|max:30',
             'nama_penerima' => 'required|string|max:100',
             'nomor_hp' => 'required|string|max:20',
             'jenis_nasabah' => 'required|in:internal,eksternal',
             'nominal_tarik' => 'required|numeric|min:1',
         ], [
-            'provider.required' => 'Provider transaksi wajib diisi.',
+            'penyedia.required' => 'Penyedia transaksi wajib diisi.',
             'nomor_rekening.required' => 'Nomor rekening wajib diisi.',
             'nama_penerima.required' => 'Nama penerima wajib diisi.',
             'nomor_hp.required' => 'Nomor HP wajib diisi.',
@@ -60,7 +60,7 @@ class TarikTunaiController extends Controller
     {
         $t = TransaksiTarikTunai::findOrFail($id);
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'nomor_rekening' => 'required|string|max:30',
             'nama_penerima' => 'required|string|max:100',
             'nomor_hp' => 'required|string|max:20',

@@ -12,7 +12,7 @@ const emptyForm = { kode_barang: '', nama_barang: '', kategori: '', stok: '', ha
 
 export default function DataBarang() {
   const { user } = useAuth()
-  const canWrite = user?.role === 'kasir'
+  const canWrite = user?.peran === 'kasir'
   const [barang, setBarang] = useState([])
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)

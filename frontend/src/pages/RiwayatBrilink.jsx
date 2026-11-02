@@ -64,7 +64,7 @@ export default function RiwayatBrilink() {
         <td>${escapeExcel(item.kode_transaksi || '-')}</td>
         <td>${escapeExcel(new Date(item.tanggal).toLocaleDateString('id-ID'))}</td>
         <td>${escapeExcel(item.jenis)}</td>
-        <td>${escapeExcel(item.provider || '-')}</td>
+        <td>${escapeExcel(item.penyedia || '-')}</td>
         <td>${escapeExcel(item.jenis_nasabah ? getLabelJenisNasabah(item.jenis_nasabah) : '-')}</td>
         <td>${escapeExcel(item.jenis_kartu || '-')}</td>
         <td>${escapeExcel(formatRowName(item))}</td>
@@ -73,7 +73,7 @@ export default function RiwayatBrilink() {
         <td>${escapeExcel(item.status || '-')}</td>
       </tr>
     `).join('')
-    const html = `<table border="1"><tr><th colspan="10">Riwayat BRILink Sultan Cell</th></tr><tr><td colspan="10">${escapeExcel(startDate)} sampai ${escapeExcel(endDate)}</td></tr><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Provider</th><th>Nasabah</th><th>Kartu</th><th>Nama/Nomor</th><th>Nominal</th><th>Admin</th><th>Status</th></tr>${rows}</table>`
+    const html = `<table border="1"><tr><th colspan="10">Riwayat BRILink Sultan Cell</th></tr><tr><td colspan="10">${escapeExcel(startDate)} sampai ${escapeExcel(endDate)}</td></tr><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Penyedia</th><th>Nasabah</th><th>Kartu</th><th>Nama/Nomor</th><th>Nominal</th><th>Admin</th><th>Status</th></tr>${rows}</table>`
     const blob = new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -117,13 +117,13 @@ export default function RiwayatBrilink() {
         <div className="brilink-table-header"><div><h2>Semua Riwayat</h2><p>{data.data.length} data ditampilkan</p></div><Filter size={20} /></div>
         <div className="brilink-table-wrap">
           <table className="brilink-table">
-            <thead><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Provider</th><th>Nasabah</th><th>Kartu</th><th>Nama/Nomor</th><th className="money-header">Nominal</th><th className="money-header">Admin Fee</th><th>Status</th></tr></thead>
+            <thead><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Penyedia</th><th>Nasabah</th><th>Kartu</th><th>Nama/Nomor</th><th className="money-header">Nominal</th><th className="money-header">Admin Fee</th><th>Status</th></tr></thead>
             <tbody>{data.data.map((t, index) => (
               <tr key={index}>
                 <td><span className="item-code">{t.kode_transaksi || '-'}</span></td>
                 <td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill blue">{t.jenis}</span></td>
-                <td><span className="service-pill green">{t.provider || '-'}</span></td>
+                <td><span className="service-pill green">{t.penyedia || '-'}</span></td>
                 <td>{t.jenis_nasabah ? getLabelJenisNasabah(t.jenis_nasabah) : '-'}</td>
                 <td>{t.jenis_kartu || '-'}</td>
                 <td>{formatRowName(t)}</td>

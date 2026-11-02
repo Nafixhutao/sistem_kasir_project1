@@ -35,9 +35,9 @@ class SupplierAuthorizationTest extends TestCase
         }
         $this->deleteJson('/api/suppliers/'.$id)->assertOk();
         $this->assertDatabaseMissing('suppliers', ['id'=>$id]);
-        $logs = ActivityLog::where('module','Supplier')->get(); $this->assertCount(4, $logs);
+        $logs = ActivityLog::where('modul','Supplier')->get(); $this->assertCount(4, $logs);
         foreach ($logs as $log) {
-            $this->assertSame($admin->username, $log->user_name);
+            $this->assertSame($admin->username, $log->nama_pengguna);
             $this->assertSame(['supplier_id','nama_supplier'], array_keys($log->properties));
             foreach (['no_telepon','alamat','keterangan','password','token'] as $key) $this->assertArrayNotHasKey($key, $log->properties);
         }
@@ -49,7 +49,7 @@ class SupplierAuthorizationTest extends TestCase
         $this->getJson('/api/suppliers')->assertOk(); $this->getJson('/api/suppliers/'.$supplier->id)->assertOk();
         foreach (['POST','PUT','PATCH','DELETE'] as $method) {
             $path = '/api/suppliers'.($method === 'POST' ? '' : '/'.$supplier->id);
-            $this->json($method, $path, $this->supplierData()+['role'=>'admin'])->assertForbidden();
+            $this->json($method, $path, $this->supplierData()+['peran'=>'admin'])->assertForbidden();
         }
         $this->assertSame('kasir', $user->fresh()->role);
         $this->assertTrue($before === hash('sha256', json_encode($supplier->fresh()->getRawOriginal())));
@@ -118,7 +118,7 @@ class SupplierAuthorizationTest extends TestCase
         $this->assertFalse(DB::table('barang')->whereNotNull('supplier_id')->exists());
         $id = DB::selectOne("SELECT COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='suppliers' AND COLUMN_NAME='id'");
         $this->assertSame('int unsigned', $id->COLUMN_TYPE);
-        $this->assertSame(['id','nama_supplier','no_telepon','alamat','keterangan','created_at','updated_at'], Schema::getColumnListing('suppliers'));
+        $this->assertSame(['id','nama_supplier','no_telepon','alamat','keterangan','dibuat_pada','diperbarui_pada'], Schema::getColumnListing('suppliers'));
     }
     public function test_read_routes_do_not_write_and_frontend_contract_uses_existing_roles(): void
     {

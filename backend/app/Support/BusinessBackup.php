@@ -17,6 +17,24 @@ final class BusinessBackup
     ];
     /** Tabel versi lama yang sudah dihapus dari skema; masih boleh ada di file backup lama dan diabaikan saat restore. */
     private const LEGACY_TABLES = ['retur_penjualan', 'biaya_admin'];
+
+    /**
+     * Nama kolom pada file backup versi lama (sebelum penyeragaman bahasa Indonesia).
+     * Dipakai agar backup lama tetap bisa direstore setelah kolom diganti nama.
+     */
+    private const LEGACY_COLUMNS = [
+        'created_at' => 'dibuat_pada',
+        'updated_at' => 'diperbarui_pada',
+        'name' => 'nama',
+        'role' => 'peran',
+        'is_active' => 'aktif',
+        'module' => 'modul',
+        'action' => 'aksi',
+        'description' => 'keterangan',
+        'properties' => 'properti',
+        'user_name' => 'nama_pengguna',
+        'provider' => 'penyedia',
+    ];
     private const OPTIONAL = ['suppliers', 'retur_supplier', 'retur_pelanggan', 'providers', 'idempotency_records'];
 
     public static function metadata(): array
@@ -41,6 +59,20 @@ final class BusinessBackup
         return [$columns, $foreign, $indexes];
     }
 
+    /** Mengganti nama kolom versi lama pada satu baris backup agar cocok dengan skema sekarang. */
+    private static function upgradeLegacyColumns(array $row, array $kolomSekarang): array
+    {
+        foreach (self::LEGACY_COLUMNS as $lama => $baru) {
+            if (!array_key_exists($lama, $row) || array_key_exists($baru, $row) || !isset($kolomSekarang[$baru])) {
+                continue;
+            }
+            $row[$baru] = $row[$lama];
+            unset($row[$lama]);
+        }
+
+        return $row;
+    }
+
     /** Called inside the transaction, before any DELETE/INSERT. */
     public static function prepare(array $backup): array
     {
@@ -56,7 +88,9 @@ final class BusinessBackup
             if (!is_array($rows) || !array_is_list($rows)) self::invalid('Isi tabel backup harus berupa daftar row.');
             $prepared[$table] = [];
             foreach ($rows as $row) {
-                if (!is_array($row) || array_diff(array_keys($row), array_keys($columns[$table]))) self::invalid('Kolom backup tidak sesuai schema.');
+                if (!is_array($row)) self::invalid('Isi tabel backup harus berupa daftar row.');
+                $row = self::upgradeLegacyColumns($row, $columns[$table]);
+                if (array_diff(array_keys($row), array_keys($columns[$table]))) self::invalid('Kolom backup tidak sesuai schema.');
                 $normalized = [];
                 foreach ($columns[$table] as $name => $column) {
                     if (!array_key_exists($name, $row)) {
@@ -165,7 +199,7 @@ final class BusinessBackup
                 if (($r['request_id'] ?? null)===null) continue;
                 // Legacy backups can reconstruct only verifiable completed metadata.
                 $merge(['scope'=>$scope,'request_id'=>$r['request_id'],'request_hash'=>$r['request_hash'] ?? '',
-                    'status'=>'completed','result_id'=>$r['id'],'created_at'=>$r['created_at'] ?? null,'updated_at'=>$r['created_at'] ?? null]);
+                    'status'=>'completed','result_id'=>$r['id'],'dibuat_pada'=>$r['dibuat_pada'] ?? null,'diperbarui_pada'=>$r['dibuat_pada'] ?? null]);
             }
         }
         $prepared['idempotency_records']=array_values($map);

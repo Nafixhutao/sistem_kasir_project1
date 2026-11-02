@@ -83,7 +83,7 @@ class LaporanController extends Controller
 
         $retur = $query
             ->orderBy('tanggal_retur', 'desc')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('dibuat_pada', 'desc')
             ->get();
 
         return response()->json([

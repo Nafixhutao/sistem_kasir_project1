@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class Barang extends Model
+
+class Barang extends BaseModel
 {
     protected $table = 'barang';
     protected $fillable = [

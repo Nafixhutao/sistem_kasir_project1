@@ -17,7 +17,7 @@ class NotifikasiController extends Controller
 
         $notifikasi = Notifikasi::query()
             ->where('user_id', $request->user()->id)
-            ->orderByDesc('created_at')
+            ->orderByDesc('dibuat_pada')
             ->limit($limit)
             ->get();
 
@@ -60,7 +60,7 @@ class NotifikasiController extends Controller
         Notifikasi::query()
             ->where('user_id', $request->user()->id)
             ->whereNull('dibaca_at')
-            ->update(['dibaca_at' => now(), 'updated_at' => now()]);
+            ->update(['dibaca_at' => now(), 'diperbarui_pada' => now()]);
 
         return response()->json([
             'message' => 'Semua notifikasi sudah dibaca',

@@ -9,8 +9,8 @@ class AccountAccess
     {
         $user = $request->user();
         $fresh = $user ? User::find($user->id) : null;
-        if (!$fresh || !$fresh->is_active) return response()->json(['message'=>'Sesi tidak berlaku. Silakan login kembali.'],401);
-        $role = $fresh->role;
+        if (!$fresh || !$fresh->aktif) return response()->json(['message'=>'Sesi tidak berlaku. Silakan login kembali.'],401);
+        $role = $fresh->peran;
         if (!in_array($role,['kasir','admin'],true)) abort(403);
         $path = $request->path();
         $management = preg_match('~^api/users(?:/[0-9]+/(?:status|reset-password))?$~D', $path);
@@ -30,8 +30,8 @@ class AccountAccess
             if (!$read && !$own) abort(403);
         }
         // Keep the Sanctum token on the original instance while using current DB role/status.
-        $user->role = $fresh->role;
-        $user->is_active = $fresh->is_active;
+        $user->peran = $fresh->peran;
+        $user->aktif = $fresh->aktif;
         return $next($request);
     }
 }

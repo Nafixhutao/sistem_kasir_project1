@@ -11,13 +11,17 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // Nama kolom waktu di database memakai bahasa Indonesia.
+    public const CREATED_AT = 'dibuat_pada';
+    public const UPDATED_AT = 'diperbarui_pada';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'nama',
         'username',
         'password',
     ];
@@ -42,7 +46,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'password' => 'hashed',
-        'is_active' => 'boolean',
+        'aktif' => 'boolean',
     ];
 
     public function notifikasi()

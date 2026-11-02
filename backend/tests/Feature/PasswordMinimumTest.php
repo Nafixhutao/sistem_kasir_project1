@@ -88,13 +88,13 @@ class PasswordMinimumTest extends TestCase
         $password = bin2hex(random_bytes(4));
         $next = bin2hex(random_bytes(4));
         $reset = bin2hex(random_bytes(4));
-        $data = ['name' => 'Minimum fixture', 'username' => 'min_cashier_'.Str::lower(Str::random(12)),
+        $data = ['nama' => 'Minimum fixture', 'username' => 'min_cashier_'.Str::lower(Str::random(12)),
             'password' => $password, 'password_confirmation' => $password];
         $this->asToken($adminToken)->postJson('/api/users', array_replace($data,
             ['password' => str_repeat('p', 7), 'password_confirmation' => str_repeat('p', 7)]))
             ->assertUnprocessable()->assertJsonValidationErrors('password');
         $created = $this->asToken($adminToken)->postJson('/api/users', $data)
-            ->assertCreated()->assertJsonPath('role', 'kasir');
+            ->assertCreated()->assertJsonPath('peran', 'kasir');
         $cashier = User::findOrFail($created->json('id'));
         $this->assertTrue(Hash::check($password, $cashier->password));
         $cashierToken = $cashier->createToken('minimum-cashier')->plainTextToken;

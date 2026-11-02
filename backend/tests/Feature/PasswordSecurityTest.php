@@ -22,7 +22,7 @@ class PasswordSecurityTest extends TestCase
 
     private function identity(User $user): string
     {
-        return hash('sha256', json_encode($user->fresh()->only(['id','name','username','remember_token','created_at'])));
+        return hash('sha256', json_encode($user->fresh()->only(['id','nama','username','remember_token','dibuat_pada'])));
     }
 
     public function test_public_reset_and_anonymous_change_are_blocked(): void
@@ -60,8 +60,8 @@ class PasswordSecurityTest extends TestCase
         $this->withToken($otherTokens[0])->getJson('/api/me')->assertOk();
         $this->postJson('/api/login', ['username'=>$user->username,'password'=>$plain])->assertUnauthorized();
         $this->postJson('/api/login', ['username'=>$user->username,'password'=>$next])->assertOk();
-        $log = ActivityLog::where('action','change-password')->latest('id')->firstOrFail();
-        $this->assertSame($user->username, $log->user_name);
+        $log = ActivityLog::where('aksi','change-password')->latest('id')->firstOrFail();
+        $this->assertSame($user->username, $log->nama_pengguna);
         $this->assertSame(['user_id'=>$user->id,'username'=>$user->username], $log->properties);
         $this->assertFalse(str_contains(json_encode($log), $next));
         $this->assertFalse(str_contains(json_encode($log), $user->fresh()->getRawOriginal('password')));
@@ -80,7 +80,7 @@ class PasswordSecurityTest extends TestCase
             array_replace($valid, ['password'=>str_repeat('é',37),'password_confirmation'=>str_repeat('é',37)]),
             array_replace($valid, ['password'=>"abcdefghijkl\0",'password_confirmation'=>"abcdefghijkl\0"]),
             array_replace($valid, ['password'=>$plain,'password_confirmation'=>$plain]),
-            $valid+['username'=>'admin'], $valid+['role'=>'admin'], $valid+['user_id'=>1],
+            $valid+['username'=>'admin'], $valid+['peran'=>'admin'], $valid+['user_id'=>1],
         ];
         foreach ($cases as $payload) $this->withToken($tokens[0])->postJson('/api/change-password', $payload)->assertUnprocessable();
         $this->assertTrue($before === hash('sha256', json_encode($user->fresh()->getRawOriginal())));
@@ -99,10 +99,10 @@ class PasswordSecurityTest extends TestCase
     {
         [$user, $plain] = $this->fixture();
         $login = $this->postJson('/api/login', ['username'=>$user->username,'password'=>$plain])->assertOk();
-        $this->assertSame(['id','name','username','role'], array_keys($login->json('user')));
+        $this->assertSame(['id','nama','username','peran'], array_keys($login->json('user')));
         $this->assertSame(['message','user','token'], array_keys($login->json()));
         $me = $this->withToken($login->json('token'))->getJson('/api/me')->assertOk();
-        $this->assertSame(['id','name','username','role'], array_keys($me->json()));
+        $this->assertSame(['id','nama','username','peran'], array_keys($me->json()));
     }
 
     public function test_local_reset_preserves_other_user_and_uses_hidden_input(): void
@@ -126,7 +126,7 @@ class PasswordSecurityTest extends TestCase
         $source = file_get_contents(app_path('Console/Commands/ResetUserPassword.php'));
         $this->assertStringContainsString("secret('New password', false)", $source);
         $this->assertStringContainsString("secret('Confirm password', false)", $source);
-        $log = ActivityLog::where('action','local-reset-password')->latest('id')->firstOrFail();
+        $log = ActivityLog::where('aksi','local-reset-password')->latest('id')->firstOrFail();
         $this->assertFalse(str_contains(json_encode($log), $next));
         $this->assertSame(['user_id'=>$user->id,'username'=>$user->username], $log->properties);
     }

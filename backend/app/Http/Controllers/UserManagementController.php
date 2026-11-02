@@ -22,41 +22,41 @@ class UserManagementController extends Controller
     private function owner(Request $request): User
     {
         $owner = User::whereKey($request->user()->id)->lockForUpdate()->firstOrFail();
-        abort_unless($owner->role === 'admin' && $owner->is_active,403);
+        abort_unless($owner->peran === 'admin' && $owner->aktif,403);
         return $owner;
     }
     private function log(User $actor, User $target, string $action): void
     {
-        ActivityLog::create(['user_name'=>$actor->username,'module'=>'Users','action'=>$action,'description'=>'Manajemen akun Kasir.','properties'=>['user_id'=>$target->id,'username'=>$target->username,'is_active'=>$target->is_active]]);
+        ActivityLog::create(['nama_pengguna'=>$actor->username,'modul'=>'Users','aksi'=>$action,'keterangan'=>'Manajemen akun Kasir.','properti'=>['user_id'=>$target->id,'username'=>$target->username,'aktif'=>$target->aktif]]);
     }
     public function index()
     {
-        return response()->json(User::where('role','kasir')->orderBy('id')->get(['id','name','username','role','is_active']));
+        return response()->json(User::where('peran','kasir')->orderBy('id')->get(['id','nama','username','peran','aktif']));
     }
     public function store(Request $request)
     {
-        $this->fields($request,['name','username','password','password_confirmation']);
-        $data = $request->validate(['name'=>'required|string|max:50','username'=>'required|string|max:50|unique:users,username','password'=>PasswordPolicy::rules(),'password_confirmation'=>'required|string']);
+        $this->fields($request,['nama','username','password','password_confirmation']);
+        $data = $request->validate(['nama'=>'required|string|max:50','username'=>'required|string|max:50|unique:users,username','password'=>PasswordPolicy::rules(),'password_confirmation'=>'required|string']);
         return $this->transaction(function () use ($request,$data) {
             $owner = $this->owner($request);
-            $user = new User(['name'=>$data['name'],'username'=>$data['username'],'password'=>Hash::make($data['password'])]);
-            $user->role = 'kasir'; $user->is_active = true; $user->save();
+            $user = new User(['nama'=>$data['nama'],'username'=>$data['username'],'password'=>Hash::make($data['password'])]);
+            $user->peran = 'kasir'; $user->aktif = true; $user->save();
             $this->log($owner,$user,'create-cashier');
-            return response()->json($user->only(['id','name','username','role','is_active']),201);
+            return response()->json($user->only(['id','nama','username','peran','aktif']),201);
         });
     }
     public function status(Request $request, int $id)
     {
-        $this->fields($request,['is_active']);
-        $data = $request->validate(['is_active'=>'required|boolean']);
+        $this->fields($request,['aktif']);
+        $data = $request->validate(['aktif'=>'required|boolean']);
         return $this->transaction(function () use ($request,$id,$data) {
             $owner = $this->owner($request);
             $target = User::whereKey($id)->lockForUpdate()->firstOrFail();
-            abort_unless($target->role === 'kasir',403);
-            $target->is_active = (bool)$data['is_active']; $target->save();
-            if (!$target->is_active) $target->tokens()->delete();
-            $this->log($owner,$target,$target->is_active ? 'activate-cashier' : 'deactivate-cashier');
-            return response()->json($target->only(['id','name','username','role','is_active']));
+            abort_unless($target->peran === 'kasir',403);
+            $target->aktif = (bool)$data['aktif']; $target->save();
+            if (!$target->aktif) $target->tokens()->delete();
+            $this->log($owner,$target,$target->aktif ? 'activate-cashier' : 'deactivate-cashier');
+            return response()->json($target->only(['id','nama','username','peran','aktif']));
         });
     }
     public function resetPassword(Request $request, int $id)
@@ -67,7 +67,7 @@ class UserManagementController extends Controller
             $owner = $this->owner($request);
             if (!Hash::check($data['current_password'],$owner->password)) throw ValidationException::withMessages(['current_password'=>'Password Admin tidak cocok.']);
             $target = User::whereKey($id)->lockForUpdate()->firstOrFail();
-            abort_unless($target->role === 'kasir',403);
+            abort_unless($target->peran === 'kasir',403);
             if (Hash::check($data['password'],$target->password)) throw ValidationException::withMessages(['password'=>'Password baru harus berbeda.']);
             $target->password = Hash::make($data['password']); $target->save(); $target->tokens()->delete();
             $this->log($owner,$target,'reset-cashier-password');

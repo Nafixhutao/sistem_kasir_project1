@@ -24,11 +24,11 @@ final class PasswordManagement
             $user->save();
             $user->tokens()->delete();
             ActivityLog::create([
-                'user_name' => $currentPassword === null ? 'local-operator' : $user->username,
-                'module' => 'Auth',
-                'action' => $currentPassword === null ? 'local-reset-password' : 'change-password',
-                'description' => 'Password akun diperbarui dan seluruh token akun dicabut.',
-                'properties' => ['user_id' => $user->id, 'username' => $user->username],
+                'nama_pengguna' => $currentPassword === null ? 'local-operator' : $user->username,
+                'modul' => 'Auth',
+                'aksi' => $currentPassword === null ? 'local-reset-password' : 'change-password',
+                'keterangan' => 'Password akun diperbarui dan seluruh token akun dicabut.',
+                'properti' => ['user_id' => $user->id, 'username' => $user->username],
             ]);
         });
     }

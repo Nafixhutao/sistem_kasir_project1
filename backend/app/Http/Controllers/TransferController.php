@@ -13,13 +13,13 @@ class TransferController extends Controller
 {
     public function index()
     {
-        return response()->json(TransaksiTransfer::orderBy('created_at', 'desc')->get());
+        return response()->json(TransaksiTransfer::orderBy('dibuat_pada', 'desc')->get());
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'jenis_transfer' => 'required|string|max:50',
             'bank_tujuan' => 'required|string|max:100',
             'nomor_rekening_tujuan' => 'required|string|max:30',
@@ -27,7 +27,7 @@ class TransferController extends Controller
             'jenis_nasabah' => 'required|in:internal,eksternal',
             'nominal_transfer' => 'required|numeric|min:1',
         ], [
-            'provider.required' => 'Provider transaksi wajib diisi.',
+            'penyedia.required' => 'Penyedia transaksi wajib diisi.',
             'jenis_transfer.required' => 'Jenis transfer wajib dipilih.',
             'bank_tujuan.required' => 'Bank atau tujuan transfer wajib diisi.',
             'nomor_rekening_tujuan.required' => 'Nomor rekening tujuan wajib diisi.',
@@ -62,7 +62,7 @@ class TransferController extends Controller
     {
         $t = TransaksiTransfer::findOrFail($id);
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'jenis_transfer' => 'required|string|max:50',
             'bank_tujuan' => 'required|string|max:100',
             'nomor_rekening_tujuan' => 'required|string|max:30',

@@ -37,7 +37,7 @@ export default function SalesPaymentModal({
   onCopySimulationLink,
 }) {
   const isQrisPaid = ['settlement', 'capture'].includes(qrisStatus)
-  const isSumopod = qrisData?.provider === 'sumopod'
+  const isSumopod = qrisData?.penyedia === 'sumopod'
   // Midtrans mengirim langsung URL gambar QR; SumoPod hanya tautan halaman bayar,
   // sehingga QR digambar sendiri (kode QRIS asli bila tersedia, jika tidak tautannya).
   const qrImageUrl = qrisData?.qr_image_url || (isSumopod ? null : qrisData?.qris_url)

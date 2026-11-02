@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class DetailPenjualan extends Model
+
+class DetailPenjualan extends BaseModel
 {
     protected $table = 'detail_penjualan';
     protected $fillable = [

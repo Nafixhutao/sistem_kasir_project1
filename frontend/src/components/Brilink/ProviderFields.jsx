@@ -13,7 +13,7 @@ export const FALLBACK_PROVIDER_OPTIONS = [
 ]
 
 export const normalizeProvider = (form) => {
-  if (form.provider !== 'Lainnya') return form.provider
+  if (form.penyedia !== 'Lainnya') return form.penyedia
   return (form.nama_provider || '').trim()
 }
 
@@ -42,10 +42,10 @@ export default function ProviderFields({ form, setForm }) {
   return (
     <>
       <label className="field-group">
-        <span>Provider</span>
+        <span>Penyedia</span>
         <select
-          value={form.provider}
-          onChange={e => setForm({ ...form, provider: e.target.value, nama_provider: '' })}
+          value={form.penyedia}
+          onChange={e => setForm({ ...form, penyedia: e.target.value, nama_provider: '' })}
           required
         >
           {options.map(provider => (
@@ -53,16 +53,16 @@ export default function ProviderFields({ form, setForm }) {
           ))}
         </select>
       </label>
-      {form.provider === 'Lainnya' && (
+      {form.penyedia === 'Lainnya' && (
         <label className="field-group">
-          <span>Nama Provider</span>
+          <span>Nama Penyedia</span>
           <input
             type="text"
             value={form.nama_provider || ''}
             onChange={e => setForm({ ...form, nama_provider: e.target.value })}
             maxLength={100}
             required
-            placeholder="Masukkan nama provider"
+            placeholder="Masukkan nama penyedia"
           />
         </label>
       )}

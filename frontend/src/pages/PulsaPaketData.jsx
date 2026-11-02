@@ -10,7 +10,7 @@ import BrilinkReceiptModal from '../components/Brilink/BrilinkReceiptModal'
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 
-const emptyForm = { provider: 'BRILink Mobile', nama_provider: '', operator: 'Telkomsel', jenis_layanan: 'pulsa', jenis_nasabah: 'internal', nomor_tujuan: '', produk: '', harga: '' }
+const emptyForm = { penyedia: 'BRILink Mobile', nama_provider: '', operator: 'Telkomsel', jenis_layanan: 'pulsa', jenis_nasabah: 'internal', nomor_tujuan: '', produk: '', harga: '' }
 
 export default function PulsaPaketData() {
   const [data, setData] = useState([])
@@ -27,7 +27,7 @@ export default function PulsaPaketData() {
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true)
     try {
-      const res = await api.post('/pulsa', { ...form, provider: normalizeProvider(form), harga: parseNominalInput(form.harga) })
+      const res = await api.post('/pulsa', { ...form, penyedia: normalizeProvider(form), harga: parseNominalInput(form.harga) })
       toast.success('Transaksi pulsa berhasil!')
       setReceipt({ type: 'pulsa_paket_data', data: res.data })
       setShowReceipt(true)
@@ -74,10 +74,10 @@ export default function PulsaPaketData() {
         <div className="brilink-table-header"><div><h2>Riwayat Pulsa & Data</h2><p>{data.length} transaksi tercatat</p></div></div>
         <div className="brilink-table-wrap">
           <table className="brilink-table">
-            <thead><tr><th>Kode</th><th>Tanggal</th><th>Provider</th><th>Operator</th><th>Jenis</th><th>Nasabah</th><th>Nomor</th><th>Produk</th><th className="money-header">Harga</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
+            <thead><tr><th>Kode</th><th>Tanggal</th><th>Penyedia</th><th>Operator</th><th>Jenis</th><th>Nasabah</th><th>Nomor</th><th>Produk</th><th className="money-header">Harga</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
             <tbody>{data.map(t => (
               <tr key={t.id}>
-                <td><span className="item-code">{t.kode_transaksi}</span></td><td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td><td><span className="service-pill green">{t.provider || '-'}</span></td><td><strong>{t.operator}</strong></td><td><span className={`service-pill ${t.jenis_layanan === 'pulsa' ? 'green' : 'blue'}`}>{t.jenis_layanan}</span></td>
+                <td><span className="item-code">{t.kode_transaksi}</span></td><td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td><td><span className="service-pill green">{t.penyedia || '-'}</span></td><td><strong>{t.operator}</strong></td><td><span className={`service-pill ${t.jenis_layanan === 'pulsa' ? 'green' : 'blue'}`}>{t.jenis_layanan}</span></td>
                 <td><div className="person-cell"><strong>{getLabelJenisNasabah(t.jenis_nasabah)}</strong><span>{t.jenis_kartu || '-'}</span></div></td>
                 <td>{t.nomor_tujuan}</td><td>{t.produk}</td><td className="money-cell">{formatRupiah(t.harga)}</td><td className="money-cell admin">{formatRupiah(t.biaya_admin)}</td><td className="money-cell strong">{formatRupiah(t.total_bayar)}</td>
               </tr>

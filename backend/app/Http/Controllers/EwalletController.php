@@ -12,14 +12,14 @@ class EwalletController extends Controller
 {
     public function index()
     {
-        return response()->json(TransaksiEwallet::orderBy('created_at', 'desc')->get());
+        return response()->json(TransaksiEwallet::orderBy('dibuat_pada', 'desc')->get());
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'jenis_transaksi' => 'required|in:top_up,pencairan',
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'jenis_ewallet' => 'required|string|max:100',
             'nomor_ewallet' => 'required|string|max:30',
             'nama_customer' => 'nullable|string|max:100',
@@ -28,7 +28,7 @@ class EwalletController extends Controller
         ], [
             'jenis_transaksi.required' => 'Jenis transaksi e-wallet wajib dipilih.',
             'jenis_transaksi.in' => 'Jenis transaksi e-wallet tidak valid.',
-            'provider.required' => 'Provider transaksi wajib diisi.',
+            'penyedia.required' => 'Penyedia transaksi wajib diisi.',
             'jenis_ewallet.required' => 'Jenis e-wallet wajib diisi.',
             'nomor_ewallet.required' => 'Nomor e-wallet wajib diisi.',
             'nominal.required' => 'Nominal e-wallet wajib diisi.',
@@ -58,7 +58,7 @@ class EwalletController extends Controller
         $transaksi = TransaksiEwallet::findOrFail($id);
         $data = $request->validate([
             'jenis_transaksi' => 'required|in:top_up,pencairan',
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'jenis_ewallet' => 'required|string|max:100',
             'nomor_ewallet' => 'required|string|max:30',
             'nama_customer' => 'nullable|string|max:100',
@@ -67,7 +67,7 @@ class EwalletController extends Controller
         ], [
             'jenis_transaksi.required' => 'Jenis transaksi e-wallet wajib dipilih.',
             'jenis_transaksi.in' => 'Jenis transaksi e-wallet tidak valid.',
-            'provider.required' => 'Provider transaksi wajib diisi.',
+            'penyedia.required' => 'Penyedia transaksi wajib diisi.',
             'jenis_ewallet.required' => 'Jenis e-wallet wajib diisi.',
             'nomor_ewallet.required' => 'Nomor e-wallet wajib diisi.',
             'nominal.required' => 'Nominal e-wallet wajib diisi.',

@@ -27,8 +27,8 @@ class RoleAccessTest extends TestCase
         foreach (['kasir','admin'] as $role) {
             [$user,$password] = $this->fixture($role);
             $res = $this->asToken(null)->postJson('/api/login',['username'=>$user->username,'password'=>$password])->assertOk()->assertJsonPath('user.role',$role);
-            $this->assertSame(['id','name','username','role'],array_keys($res->json('user')));
-            $this->asToken($res->json('token'))->getJson('/api/me')->assertExactJson($user->only(['id','name','username','role']));
+            $this->assertSame(['id','nama','username','peran'],array_keys($res->json('user')));
+            $this->asToken($res->json('token'))->getJson('/api/me')->assertExactJson($user->only(['id','nama','username','peran']));
         }
         $this->asToken(null)->getJson('/api/users')->assertUnauthorized();
     }
@@ -39,9 +39,9 @@ class RoleAccessTest extends TestCase
         foreach (['barang','transaksi_penjualan','transaksi_transfer','pengeluaran_toko','retur_supplier','activity_logs','providers','biaya_admin_brilink'] as $table) $before[$table] = hash('sha256',json_encode(DB::table($table)->orderBy('id')->get()));
         foreach (['dashboard','barang','barang-search','laporan/penjualan','laporan/retur-pelanggan','riwayat-brilink','pengeluaran-toko','retur-supplier','activity-logs','notifikasi','notifikasi/unread-count','users','biaya-admin'] as $path) $this->asToken($token)->getJson('/api/'.$path)->assertOk();
         foreach ($before as $table=>$digest) $this->assertTrue($digest === hash('sha256',json_encode(DB::table($table)->orderBy('id')->get())),'Read route must not change data.');
-        $log = ActivityLog::create(['user_name'=>'system','module'=>'Fixture','action'=>'fixture','properties'=>['internal'=>'private']]);
+        $log = ActivityLog::create(['nama_pengguna'=>'system','modul'=>'Fixture','aksi'=>'fixture','properti'=>['internal'=>'private']]);
         $res = $this->asToken($token)->getJson('/api/activity-logs?module=Fixture')->assertOk();
-        $this->assertArrayNotHasKey('properties',$res->json()[0]);
+        $this->assertArrayNotHasKey('properti',$res->json()[0]);
     }
     public function test_owner_all_existing_operational_routes_are_denied_before_controller(): void
     {
@@ -63,23 +63,23 @@ class RoleAccessTest extends TestCase
     {
         [$cashier,,$token] = $this->fixture();
         foreach ([['GET','/api/users'],['POST','/api/users'],['PATCH','/api/users/'.$cashier->id.'/status'],['POST','/api/users/'.$cashier->id.'/reset-password']] as [$method,$path]) $this->asToken($token)->json($method,$path,[])->assertForbidden();
-        $cashier->fill(['role'=>'admin','is_active'=>false]);
+        $cashier->fill(['peran'=>'admin','aktif'=>false]);
         $this->assertSame('kasir',$cashier->role); $this->assertTrue($cashier->is_active);
-        $this->asToken($token)->postJson('/api/change-password',['role'=>'admin'])->assertUnprocessable();
+        $this->asToken($token)->postJson('/api/change-password',['peran'=>'admin'])->assertUnprocessable();
     }
     public function test_owner_creates_cashier_unique_username_and_safe_logs(): void
     {
         [$owner,,$token] = $this->fixture('admin');
-        $data = ['name'=>'Temporary cashier','username'=>'fixture_'.bin2hex(random_bytes(8)),'password'=>bin2hex(random_bytes(16))];
+        $data = ['nama'=>'Temporary cashier','username'=>'fixture_'.bin2hex(random_bytes(8)),'password'=>bin2hex(random_bytes(16))];
         $data['password_confirmation'] = $data['password'];
-        $this->asToken($token)->postJson('/api/users',$data+['role'=>'admin'])->assertUnprocessable();
-        $res = $this->asToken($token)->postJson('/api/users',$data)->assertCreated()->assertJsonPath('role','kasir')->assertJsonPath('is_active',true);
+        $this->asToken($token)->postJson('/api/users',$data+['peran'=>'admin'])->assertUnprocessable();
+        $res = $this->asToken($token)->postJson('/api/users',$data)->assertCreated()->assertJsonPath('peran','kasir')->assertJsonPath('aktif',true);
         $target = User::findOrFail($res->json('id'));
         $this->assertTrue(Hash::check($data['password'],$target->password));
         $this->assertArrayNotHasKey('password',$res->json());
         $this->asToken($token)->postJson('/api/users',$data)->assertUnprocessable();
-        $log = ActivityLog::where('action','create-cashier')->latest('id')->first();
-        $this->assertSame($owner->username,$log->user_name);
+        $log = ActivityLog::where('aksi','create-cashier')->latest('id')->first();
+        $this->assertSame($owner->username,$log->nama_pengguna);
         $this->assertStringNotContainsString($data['password'],json_encode($log->toArray()));
     }
     public function test_deactivation_blocks_tokens_login_and_preserves_other_accounts(): void
@@ -88,7 +88,7 @@ class RoleAccessTest extends TestCase
         [$target,$password,$targetToken] = $this->fixture();
         [$other,,$otherToken] = $this->fixture();
         $otherBefore = $this->digest($other); $hash = $target->password;
-        $this->asToken($ownerToken)->patchJson('/api/users/'.$target->id.'/status',['is_active'=>false])->assertOk();
+        $this->asToken($ownerToken)->patchJson('/api/users/'.$target->id.'/status',['aktif'=>false])->assertOk();
         $this->assertSame(0,$target->tokens()->count()); $this->assertSame($hash,$target->fresh()->password);
         $this->asToken($targetToken)->getJson('/api/me')->assertUnauthorized();
         $this->asToken(null)->postJson('/api/login',['username'=>$target->username,'password'=>$password])->assertUnauthorized();
@@ -96,9 +96,9 @@ class RoleAccessTest extends TestCase
         // Reject an already-issued token even if revocation was skipped externally.
         $stale = $target->createToken('inactive-fixture')->plainTextToken;
         $this->asToken($stale)->getJson('/api/me')->assertUnauthorized();
-        $this->asToken($ownerToken)->patchJson('/api/users/'.$target->id.'/status',['is_active'=>true])->assertOk();
+        $this->asToken($ownerToken)->patchJson('/api/users/'.$target->id.'/status',['aktif'=>true])->assertOk();
         $this->asToken(null)->postJson('/api/login',['username'=>$target->username,'password'=>$password])->assertOk();
-        $this->asToken($ownerToken)->patchJson('/api/users/'.$owner->id.'/status',['is_active'=>false])->assertForbidden();
+        $this->asToken($ownerToken)->patchJson('/api/users/'.$owner->id.'/status',['aktif'=>false])->assertForbidden();
     }
     public function test_owner_reset_requires_reauthentication_and_isolates_tokens(): void
     {
@@ -106,11 +106,11 @@ class RoleAccessTest extends TestCase
         [$target,$old,$targetToken] = $this->fixture();
         [$other,,$otherToken] = $this->fixture();
         $ownerBefore = $this->digest($owner); $otherBefore = $this->digest($other);
-        $identity = $target->only(['id','name','username','role','is_active','remember_token','created_at']);
+        $identity = $target->only(['id','nama','username','peran','aktif','remember_token','dibuat_pada']);
         $new = bin2hex(random_bytes(16)); $data=['current_password'=>$ownerPassword,'password'=>$new,'password_confirmation'=>$new];
         $this->asToken($ownerToken)->postJson('/api/users/'.$target->id.'/reset-password',array_replace($data,['current_password'=>'wrong']))->assertUnprocessable();
         $this->assertSame(1,$target->tokens()->count());
-        $this->asToken($ownerToken)->postJson('/api/users/'.$target->id.'/reset-password',$data+['role'=>'admin'])->assertUnprocessable();
+        $this->asToken($ownerToken)->postJson('/api/users/'.$target->id.'/reset-password',$data+['peran'=>'admin'])->assertUnprocessable();
         $this->asToken($ownerToken)->postJson('/api/users/'.$owner->id.'/reset-password',$data)->assertForbidden();
         $res = $this->asToken($ownerToken)->postJson('/api/users/'.$target->id.'/reset-password',$data)->assertOk();
         $this->assertSame(['message'],array_keys($res->json()));
@@ -121,8 +121,8 @@ class RoleAccessTest extends TestCase
         $this->asToken($targetToken)->getJson('/api/me')->assertUnauthorized();
         $this->asToken(null)->postJson('/api/login',['username'=>$target->username,'password'=>$old])->assertUnauthorized();
         $this->asToken(null)->postJson('/api/login',['username'=>$target->username,'password'=>$new])->assertOk();
-        $log=ActivityLog::where('action','reset-cashier-password')->latest('id')->first();
-        $this->assertSame($owner->username,$log->user_name); $this->assertStringNotContainsString($new,json_encode($log->toArray()));
+        $log=ActivityLog::where('aksi','reset-cashier-password')->latest('id')->first();
+        $this->assertSame($owner->username,$log->nama_pengguna); $this->assertStringNotContainsString($new,json_encode($log->toArray()));
     }
     public function test_create_owner_command_hidden_input_and_duplicate_rejection(): void
     {
@@ -141,13 +141,13 @@ class RoleAccessTest extends TestCase
         $migration=require database_path('migrations/2026_10_08_000002_add_role_and_active_status_to_users.php');
         $this->fixture('admin');
         $rejected=false; try { $migration->down(); } catch (\RuntimeException $e) { $rejected=true; }
-        $this->assertTrue($rejected); $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('users','role'));
+        $this->assertTrue($rejected); $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('users','peran'));
     }
     public function test_cashier_activity_uses_authenticated_username(): void
     {
         [$user,,$token]=$this->fixture();
         $this->asToken($token)->postJson('/api/pengeluaran-toko',['tanggal'=>date('Y-m-d'),'kategori'=>'Lainnya','nama_pengeluaran'=>'Temporary expense','nominal'=>1000])->assertCreated()->assertJsonPath('kasir',$user->username);
-        $this->assertSame($user->username,ActivityLog::latest('id')->first()->user_name);
+        $this->assertSame($user->username,ActivityLog::latest('id')->first()->nama_pengguna);
     }
     public function test_all_protected_routes_require_authentication(): void
     {
@@ -163,12 +163,12 @@ class RoleAccessTest extends TestCase
     }
     public function test_role_schema_defaults_and_inactive_rollback_are_safe(): void
     {
-        $role=DB::selectOne("SELECT COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users' AND COLUMN_NAME='role'");
+        $role=DB::selectOne("SELECT COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='users' AND COLUMN_NAME='peran'");
         $this->assertSame("enum('kasir','admin')",$role->COLUMN_TYPE); $this->assertSame('NO',$role->IS_NULLABLE); $this->assertSame('kasir',$role->COLUMN_DEFAULT);
         [$user]=$this->fixture(); $user->is_active=false; $user->save();
         $migration=require database_path('migrations/2026_10_08_000002_add_role_and_active_status_to_users.php');
         $rejected=false; try { $migration->down(); } catch (\RuntimeException $e) { $rejected=true; }
-        $this->assertTrue($rejected); $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('users','is_active'));
+        $this->assertTrue($rejected); $this->assertTrue(\Illuminate\Support\Facades\Schema::hasColumn('users','aktif'));
     }
     public function test_owner_reset_validation_and_cli_confirmation_fail_without_changes(): void
     {

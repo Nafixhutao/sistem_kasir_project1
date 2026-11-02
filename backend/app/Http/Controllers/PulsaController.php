@@ -13,13 +13,13 @@ class PulsaController extends Controller
 {
     public function index()
     {
-        return response()->json(TransaksiPulsa::orderBy('created_at', 'desc')->get());
+        return response()->json(TransaksiPulsa::orderBy('dibuat_pada', 'desc')->get());
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'operator' => 'required|string|max:50',
             'jenis_layanan' => 'required|in:pulsa,paket_data',
             'nomor_tujuan' => 'required|string|max:20',
@@ -27,7 +27,7 @@ class PulsaController extends Controller
             'jenis_nasabah' => 'required|in:internal,eksternal',
             'harga' => 'required|numeric|min:1',
         ], [
-            'provider.required' => 'Provider transaksi wajib diisi.',
+            'penyedia.required' => 'Penyedia transaksi wajib diisi.',
             'operator.required' => 'Operator wajib dipilih.',
             'jenis_layanan.required' => 'Jenis layanan wajib dipilih.',
             'jenis_layanan.in' => 'Jenis layanan tidak valid.',
@@ -63,7 +63,7 @@ class PulsaController extends Controller
     {
         $p = TransaksiPulsa::findOrFail($id);
         $data = $request->validate([
-            'provider' => 'required|string|max:100',
+            'penyedia' => 'required|string|max:100',
             'operator' => 'required|string|max:50',
             'jenis_layanan' => 'required|in:pulsa,paket_data',
             'nomor_tujuan' => 'required|string|max:20',

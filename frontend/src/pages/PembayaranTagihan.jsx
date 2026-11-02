@@ -10,7 +10,7 @@ import BrilinkReceiptModal from '../components/Brilink/BrilinkReceiptModal'
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 
-const emptyForm = { provider: 'BRILink Mobile', nama_provider: '', jenis_layanan: 'pln', jenis_nasabah: 'internal', nomor_pelanggan: '', nama_pelanggan: '', jumlah_tagihan: '' }
+const emptyForm = { penyedia: 'BRILink Mobile', nama_provider: '', jenis_layanan: 'pln', jenis_nasabah: 'internal', nomor_pelanggan: '', nama_pelanggan: '', jumlah_tagihan: '' }
 
 export default function PembayaranTagihan() {
   const [data, setData] = useState([])
@@ -27,7 +27,7 @@ export default function PembayaranTagihan() {
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true)
     try {
-      const res = await api.post('/tagihan', { ...form, provider: normalizeProvider(form), jumlah_tagihan: parseNominalInput(form.jumlah_tagihan) })
+      const res = await api.post('/tagihan', { ...form, penyedia: normalizeProvider(form), jumlah_tagihan: parseNominalInput(form.jumlah_tagihan) })
       toast.success('Pembayaran tagihan berhasil!')
       setReceipt({ type: 'tagihan', data: res.data })
       setShowReceipt(true)
@@ -73,10 +73,10 @@ export default function PembayaranTagihan() {
         <div className="brilink-table-header"><div><h2>Riwayat Pembayaran</h2><p>{data.length} pembayaran tercatat</p></div></div>
         <div className="brilink-table-wrap">
           <table className="brilink-table">
-            <thead><tr><th>Kode</th><th>Tanggal</th><th>Provider</th><th>Layanan</th><th>Nasabah</th><th>Pelanggan</th><th className="money-header">Tagihan</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
+            <thead><tr><th>Kode</th><th>Tanggal</th><th>Penyedia</th><th>Layanan</th><th>Nasabah</th><th>Pelanggan</th><th className="money-header">Tagihan</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
             <tbody>{data.map(t => (
               <tr key={t.id}>
-                <td><span className="item-code">{t.kode_transaksi}</span></td><td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td><td><span className="service-pill green">{t.provider || '-'}</span></td><td><span className="service-pill purple">{t.jenis_layanan}</span></td>
+                <td><span className="item-code">{t.kode_transaksi}</span></td><td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td><td><span className="service-pill green">{t.penyedia || '-'}</span></td><td><span className="service-pill purple">{t.jenis_layanan}</span></td>
                 <td><div className="person-cell"><strong>{getLabelJenisNasabah(t.jenis_nasabah)}</strong><span>{t.jenis_kartu || '-'}</span></div></td>
                 <td><div className="person-cell"><strong>{t.nama_pelanggan}</strong><span>{t.nomor_pelanggan}</span></div></td>
                 <td className="money-cell">{formatRupiah(t.jumlah_tagihan)}</td><td className="money-cell admin">{formatRupiah(t.biaya_admin)}</td><td className="money-cell strong">{formatRupiah(t.total_bayar)}</td>

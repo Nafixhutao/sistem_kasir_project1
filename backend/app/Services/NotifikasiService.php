@@ -123,7 +123,7 @@ class NotifikasiService
                 'pembayaran_qris',
                 (int) $qris->id,
                 '/transaksi-penjualan',
-                "qris:gagal:{$qris->id}:{$newStatus}:{$qris->updated_at?->format('YmdHis')}"
+                "qris:gagal:{$qris->id}:{$newStatus}:{$qris->diperbarui_pada?->format('YmdHis')}"
             );
         }
     }
@@ -174,6 +174,6 @@ class NotifikasiService
             ->where('referensi_id', $barang->id)
             ->whereIn('tipe', ['stok_menipis', 'stok_habis'])
             ->whereNull('dibaca_at')
-            ->update(['dibaca_at' => now(), 'updated_at' => now()]);
+            ->update(['dibaca_at' => now(), 'diperbarui_pada' => now()]);
     }
 }

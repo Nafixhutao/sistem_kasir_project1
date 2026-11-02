@@ -12,7 +12,7 @@ class ProviderController extends Controller
 
         return response()->json(
             Provider::query()
-                ->where('is_active', true)
+                ->where('aktif', true)
                 ->orderBy('nama_provider')
                 ->get(['id', 'nama_provider'])
         );

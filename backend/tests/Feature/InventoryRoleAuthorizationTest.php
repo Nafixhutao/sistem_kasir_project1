@@ -36,7 +36,7 @@ class InventoryRoleAuthorizationTest extends TestCase
         $this->getJson('/api/barang-search?q='.$data['kode_barang'])->assertOk();
         foreach(['POST','PUT','PATCH','DELETE'] as $method){
             $url='/api/barang'.($method==='POST'?'':'/'.$barang->id);
-            $this->json($method,$url,array_replace($data,['stok'=>99,'role'=>'kasir']))->assertForbidden();
+            $this->json($method,$url,array_replace($data,['stok'=>99,'peran'=>'kasir']))->assertForbidden();
         }
         $this->postJson('/api/barang/import',['items'=>[$data]])->assertForbidden();
         $this->assertSame($before,$barang->fresh()->getRawOriginal());
@@ -63,8 +63,8 @@ class InventoryRoleAuthorizationTest extends TestCase
         $this->assertSame('10000.00',$row->harga_beli);
         $this->assertSame('15000.00',$row->harga_jual);
         $this->assertSame('kasir',$cashier->fresh()->role);
-        foreach(ActivityLog::where('module','Barang')->where('description','like','%'.$data['nama_barang'].'%')->get() as $log){
-            $this->assertSame($cashier->username,$log->user_name);
+        foreach(ActivityLog::where('modul','Barang')->where('keterangan','like','%'.$data['nama_barang'].'%')->get() as $log){
+            $this->assertSame($cashier->username,$log->nama_pengguna);
         }
         $this->deleteJson('/api/barang/'.$id)->assertOk();
         $this->assertDatabaseMissing('barang',['id'=>$id]);

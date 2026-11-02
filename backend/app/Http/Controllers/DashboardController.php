@@ -44,7 +44,7 @@ class DashboardController extends Controller
         $stokMenipis = Barang::where('stok', '<', 5)->get();
 
         $transaksiTerbaru = TransaksiPenjualan::with('details')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('dibuat_pada', 'desc')
             ->limit(5)
             ->get();
 
@@ -55,7 +55,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $aktivitasTerbaru = ActivityLog::orderBy('created_at', 'desc')->limit(6)->get();
+        $aktivitasTerbaru = ActivityLog::orderBy('dibuat_pada', 'desc')->limit(6)->get();
 
         return response()->json([
             'total_penjualan_hari_ini' => $totalPenjualanHariIni,

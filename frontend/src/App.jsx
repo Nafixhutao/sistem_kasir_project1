@@ -29,8 +29,8 @@ function PrivateRoute({ children }) {
   const { pathname } = useLocation()
   if (!token) return <Navigate to="/login" replace />
   if (!user) return <PageLoader />
-  if (!['kasir','admin'].includes(user.role)) return <Navigate to="/login" replace />
-  if ((user.role === 'admin' && !ownerPaths.includes(pathname)) || (user.role === 'kasir' && pathname === '/manajemen-pengguna')) return <Navigate to="/dashboard" replace />
+  if (!['kasir','admin'].includes(user.peran)) return <Navigate to="/login" replace />
+  if ((user.peran === 'admin' && !ownerPaths.includes(pathname)) || (user.peran === 'kasir' && pathname === '/manajemen-pengguna')) return <Navigate to="/dashboard" replace />
   return children
 }
 

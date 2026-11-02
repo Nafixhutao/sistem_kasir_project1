@@ -17,7 +17,7 @@ export default function EWallet() {
   const { hitung } = useBiayaAdminBrilink()
   const [form, setForm] = useState({
     jenis_transaksi: 'top_up',
-    provider: 'BRILink Mobile',
+    penyedia: 'BRILink Mobile',
     nama_provider: '',
     jenis_ewallet: 'DANA',
     nomor_ewallet: '',
@@ -41,12 +41,12 @@ export default function EWallet() {
     e.preventDefault()
     setLoading(true)
     try {
-      const res = await api.post('/ewallet', { ...form, provider: normalizeProvider(form), nominal: parseNominalInput(form.nominal) })
+      const res = await api.post('/ewallet', { ...form, penyedia: normalizeProvider(form), nominal: parseNominalInput(form.nominal) })
       toast.success('Transaksi e-wallet berhasil dicatat')
       setReceipt({ type: 'ewallet', data: res.data })
       setShowReceipt(true)
       setData(prev => [res.data, ...prev])
-      setForm({ jenis_transaksi: 'top_up', provider: 'BRILink Mobile', nama_provider: '', jenis_ewallet: 'DANA', nomor_ewallet: '', nama_customer: '', nominal: '', keterangan: '' })
+      setForm({ jenis_transaksi: 'top_up', penyedia: 'BRILink Mobile', nama_provider: '', jenis_ewallet: 'DANA', nomor_ewallet: '', nama_customer: '', nominal: '', keterangan: '' })
       setShowForm(false)
     } catch (e) {
       toast.error(getApiErrorMessage(e, 'Gagal menyimpan transaksi e-wallet'))
@@ -108,14 +108,14 @@ export default function EWallet() {
               <col className="ewallet-money-col" />
               <col className="ewallet-money-col" />
             </colgroup>
-            <thead><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Provider</th><th>E-Wallet</th><th>Nomor</th><th className="money-header">Nominal</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
+            <thead><tr><th>Kode</th><th>Tanggal</th><th>Jenis</th><th>Penyedia</th><th>E-Wallet</th><th>Nomor</th><th className="money-header">Nominal</th><th className="money-header">Admin</th><th className="money-header">Total</th></tr></thead>
             <tbody>{data.map(item => (
               <tr key={item.id}>
                 <td><span className="item-code">{item.kode_transaksi}</span></td>
                 <td className="nowrap">{new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
                 <td><span className="service-pill blue">{item.jenis_transaksi === 'top_up' ? 'Top Up' : 'Pencairan'}</span></td>
-                <td>{item.provider}</td>
-                <td>{item.jenis_ewallet || item.provider}</td>
+                <td>{item.penyedia}</td>
+                <td>{item.jenis_ewallet || item.penyedia}</td>
                 <td>{item.nomor_ewallet}</td>
                 <td className="money-cell">{formatRupiah(item.nominal)}</td>
                 <td className="money-cell admin">{formatRupiah(item.biaya_admin)}</td>

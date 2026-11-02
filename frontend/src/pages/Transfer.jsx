@@ -11,7 +11,7 @@ import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 
 const emptyForm = {
-  provider: 'BRILink Mobile',
+  penyedia: 'BRILink Mobile',
   nama_provider: '',
   jenis_transfer: 'Sesama BRI',
   bank_tujuan: 'BRI',
@@ -37,7 +37,7 @@ export default function Transfer() {
   const handleSubmit = async (e) => {
     e.preventDefault(); setLoading(true)
     try {
-      const res = await api.post('/transfer', { ...form, provider: normalizeProvider(form), nominal_transfer: parseNominalInput(form.nominal_transfer) })
+      const res = await api.post('/transfer', { ...form, penyedia: normalizeProvider(form), nominal_transfer: parseNominalInput(form.nominal_transfer) })
       toast.success('Transfer berhasil dicatat!')
       setReceipt({ type: 'transfer', data: res.data })
       setShowReceipt(true)
@@ -96,12 +96,12 @@ export default function Transfer() {
         <div className="brilink-table-header"><div><h2>Riwayat Transfer</h2><p>{data.length} transaksi tercatat</p></div></div>
         <div className="brilink-table-wrap">
           <table className="brilink-table">
-            <thead><tr><th>Kode</th><th>Tanggal</th><th>Provider</th><th>Jenis</th><th>Nasabah</th><th>Penerima</th><th className="money-header">Nominal</th><th className="money-header">Admin</th><th className="money-header">Total</th><th>Status</th></tr></thead>
+            <thead><tr><th>Kode</th><th>Tanggal</th><th>Penyedia</th><th>Jenis</th><th>Nasabah</th><th>Penerima</th><th className="money-header">Nominal</th><th className="money-header">Admin</th><th className="money-header">Total</th><th>Status</th></tr></thead>
             <tbody>{data.map(t => (
               <tr key={t.id}>
                 <td><span className="item-code">{t.kode_transaksi}</span></td>
                 <td className="nowrap">{new Date(t.tanggal).toLocaleDateString('id-ID')}</td>
-                <td><span className="service-pill green">{t.provider || '-'}</span></td>
+                <td><span className="service-pill green">{t.penyedia || '-'}</span></td>
                 <td><div className="person-cell"><span className="service-pill blue">{t.jenis_transfer}</span><span>{t.bank_tujuan || '-'}</span></div></td>
                 <td><div className="person-cell"><strong>{getLabelJenisNasabah(t.jenis_nasabah)}</strong><span>{t.jenis_kartu || '-'}</span></div></td>
                 <td><div className="person-cell"><strong>{t.nama_penerima}</strong><span>{t.nomor_rekening_tujuan}</span></div></td>

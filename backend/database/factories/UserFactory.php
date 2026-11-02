@@ -24,7 +24,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => 'Test Admin',
+            'nama' => 'Test Admin',
             'username' => 'test_'.Str::lower(Str::random(24)),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),

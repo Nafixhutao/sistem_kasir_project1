@@ -16,7 +16,7 @@ const toInputDate = (date) => {
 
 export default function LaporanPenjualan() {
   const { user } = useAuth()
-  const canWrite = user?.role === 'kasir'
+  const canWrite = user?.peran === 'kasir'
   const [data, setData] = useState({ transaksi: [], total_penjualan: 0, total_transaksi: 0, chart_data: [] })
   const [customerReturns, setCustomerReturns] = useState([])
   const [startDate, setStartDate] = useState(toInputDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)))
@@ -113,7 +113,7 @@ export default function LaporanPenjualan() {
       return `
         <tr>
           <td>${escapeExcel(transaction.kode_transaksi)}</td>
-          <td>${escapeExcel(formatDateTime(transaction.created_at || transaction.tanggal))}</td>
+          <td>${escapeExcel(formatDateTime(transaction.dibuat_pada || transaction.tanggal))}</td>
           <td>${escapeExcel(transaction.metode_pembayaran?.toUpperCase())}</td>
           <td>${escapeExcel(transaction.status)}</td>
           <td>${escapeExcel(transaction.has_customer_return ? 'Ada Retur' : '-')}</td>
@@ -454,7 +454,7 @@ export default function LaporanPenjualan() {
               <div className="receipt-divider"></div>
               <div className="receipt-meta">
                 <div><span>No</span><strong>{selectedTransaction.kode_transaksi}</strong></div>
-                <div><span>Waktu</span><strong>{formatDateTime(selectedTransaction.created_at || selectedTransaction.tanggal)}</strong></div>
+                <div><span>Waktu</span><strong>{formatDateTime(selectedTransaction.dibuat_pada || selectedTransaction.tanggal)}</strong></div>
                 <div><span>Kasir</span><strong>{selectedTransaction.kasir || '-'}</strong></div>
                 <div><span>Status</span><strong>{selectedTransaction.status}</strong></div>
                 <div><span>Bayar</span><strong>{selectedTransaction.metode_pembayaran?.toUpperCase()}</strong></div>

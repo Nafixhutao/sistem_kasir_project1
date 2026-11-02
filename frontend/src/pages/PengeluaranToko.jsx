@@ -15,7 +15,7 @@ const toInputDate = (date) => {
 
 export default function PengeluaranToko() {
   const { user } = useAuth()
-  const canWrite = user?.role === 'kasir'
+  const canWrite = user?.peran === 'kasir'
   const [data, setData] = useState([])
   const [startDate, setStartDate] = useState(toInputDate(new Date(new Date().getFullYear(), new Date().getMonth(), 1)))
   const [endDate, setEndDate] = useState(toInputDate(new Date()))

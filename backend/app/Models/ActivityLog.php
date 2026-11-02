@@ -2,27 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class ActivityLog extends Model
+
+class ActivityLog extends BaseModel
 {
     protected $fillable = [
-        'user_name', 'module', 'action', 'description', 'properties',
+        'nama_pengguna', 'modul', 'aksi', 'keterangan', 'properti',
     ];
 
     protected $casts = [
-        'properties' => 'array',
+        'properti' => 'array',
     ];
 
-    public static function record(string $module, string $action, ?string $description = null, array $properties = []): void
+    public static function record(string $modul, string $aksi, ?string $keterangan = null, array $properties = []): void
     {
         try {
             self::create([
-                'user_name' => request()->is('api/midtrans/notification') ? 'midtrans' : (auth()->user()?->username ?? 'system'),
-                'module' => $module,
-                'action' => $action,
-                'description' => $description,
-                'properties' => $properties,
+                'nama_pengguna' => request()->is('api/midtrans/notification') ? 'midtrans' : (auth()->user()?->username ?? 'system'),
+                'modul' => $modul,
+                'aksi' => $aksi,
+                'keterangan' => $keterangan,
+                'properti' => $properties,
             ]);
         } catch (\Throwable $e) {
             report($e);

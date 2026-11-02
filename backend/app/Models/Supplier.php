@@ -1,7 +1,7 @@
 <?php
 namespace App\Models;
-use Illuminate\Database\Eloquent\Model;
-class Supplier extends Model
+
+class Supplier extends BaseModel
 {
     protected $fillable = ['nama_supplier', 'no_telepon', 'alamat', 'keterangan'];
     public function barang()

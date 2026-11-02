@@ -52,8 +52,8 @@ class BackupController extends Controller
                 }
                 // Include audit in the transaction; a failure cannot commit a partial restore.
                 ActivityLog::create([
-                    'user_name' => $request->user()->username, 'module' => 'Backup', 'action' => 'restore',
-                    'description' => 'Restore backup data website', 'properties' => [],
+                    'nama_pengguna' => $request->user()->username, 'modul' => 'Backup', 'aksi' => 'restore',
+                    'keterangan' => 'Restore backup data website', 'properti' => [],
                 ]);
             });
         } catch (ValidationException $e) {

@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class ReturSupplier extends Model
+
+class ReturSupplier extends BaseModel
 {
     use HasFactory;
 

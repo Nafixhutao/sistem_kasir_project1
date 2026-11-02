@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class ReturPelanggan extends Model
+
+class ReturPelanggan extends BaseModel
 {
     protected $table = 'retur_pelanggan';
     protected $hidden = ['request_hash'];

@@ -25,7 +25,7 @@ const layananIcons = {
 
 export default function PengaturanBiayaAdmin() {
   const { user } = useAuth()
-  const canManage = user?.role === 'admin'
+  const canManage = user?.peran === 'admin'
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
 

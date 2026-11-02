@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Support\Facades\Schema;
 
-class BiayaAdminBrilink extends Model
+class BiayaAdminBrilink extends BaseModel
 {
     protected $table = 'biaya_admin_brilink';
 

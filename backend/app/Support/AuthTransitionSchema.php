@@ -10,14 +10,14 @@ final class AuthTransitionSchema
     public static function state(): string
     {
         $c=[]; foreach (DB::select('SHOW COLUMNS FROM users') as $column) $c[$column->Field]=$column;
-        $base=['id','name','password','remember_token','created_at','updated_at'];
+        $base=['id','nama','password','remember_token','dibuat_pada','diperbarui_pada'];
         foreach (['legacy'=>['email','email_verified_at'],'username'=>['username','email','email_verified_at'],
-            'prepared'=>['username','role','is_active','email','email_verified_at'],'final'=>['username','role','is_active']] as $state=>$extra) {
+            'prepared'=>['username','peran','aktif','email','email_verified_at'],'final'=>['username','peran','aktif']] as $state=>$extra) {
             $expected=array_merge($base,$extra); sort($expected); $actual=array_keys($c); sort($actual);
             if ($expected!==$actual) continue;
             if ($c['id']->Type!=='int unsigned' || $c['password']->Type!=='varchar(255)' || $c['remember_token']->Type!=='varchar(100)') throw new RuntimeException('Account column types require review.');
             if ($state!=='legacy') {
-                if ($c['username']->Type!=='varchar(50)' || $c['username']->Null!=='NO' || $c['name']->Type!=='varchar(50)') throw new RuntimeException('Username schema requires review.');
+                if ($c['username']->Type!=='varchar(50)' || $c['username']->Null!=='NO' || $c['nama']->Type!=='varchar(50)') throw new RuntimeException('Username schema requires review.');
                 self::unique('users_username_unique','username');
                 if (DB::table('users')->whereNull('username')->orWhereRaw('CHAR_LENGTH(TRIM(username))=0 OR CHAR_LENGTH(username)>50')->exists()) throw new RuntimeException('Username data invalid.');
             }
@@ -29,9 +29,9 @@ final class AuthTransitionSchema
                 if ($state!=='legacy' && DB::table('users')->whereNotNull('email')->whereRaw('BINARY email <> BINARY username')->exists()) throw new RuntimeException('Legacy login copy mismatch.');
             }
             if (in_array($state,['prepared','final'],true)) {
-                if ($c['role']->Type!=="enum('kasir','admin')" || $c['role']->Null!=='NO' || $c['role']->Default!=='kasir'
-                    || $c['is_active']->Type!=='tinyint(1)' || $c['is_active']->Null!=='NO' || (string)$c['is_active']->Default!=='1'
-                    || DB::table('users')->whereNotIn('role',['kasir','admin'])->orWhereNotIn('is_active',[0,1])->exists()) throw new RuntimeException('Role/status schema requires review.');
+                if ($c['peran']->Type!=="enum('kasir','admin')" || $c['peran']->Null!=='NO' || $c['peran']->Default!=='kasir'
+                    || $c['aktif']->Type!=='tinyint(1)' || $c['aktif']->Null!=='NO' || (string)$c['aktif']->Default!=='1'
+                    || DB::table('users')->whereNotIn('peran',['kasir','admin'])->orWhereNotIn('aktif',[0,1])->exists()) throw new RuntimeException('Role/status schema requires review.');
             }
             return $state;
         }
@@ -51,7 +51,7 @@ final class AuthTransitionSchema
         }
         // Existing values and timestamps are untouched. Nullable legacy email lets
         // the final username-only factory/API/command create accounts during transition.
-        DB::statement("ALTER TABLE users ADD role ENUM('kasir','admin') NOT NULL DEFAULT 'kasir' AFTER username, ADD is_active BOOLEAN NOT NULL DEFAULT TRUE AFTER role, MODIFY email VARCHAR(191) NULL");
+        DB::statement("ALTER TABLE users ADD peran ENUM('kasir','admin') NOT NULL DEFAULT 'kasir' AFTER username, ADD aktif BOOLEAN NOT NULL DEFAULT TRUE AFTER peran, MODIFY email VARCHAR(191) NULL");
     }
 
     public static function finalize(): void
@@ -76,7 +76,7 @@ final class AuthTransitionSchema
 
     public static function undoPrepare(): void
     {
-        if (!DB::connection()->pretending() && (self::state()!=='prepared' || DB::table('users')->where('role','<>','kasir')->orWhere('is_active',false)->orWhereNull('email')->exists())) throw new RuntimeException('Rollback would lose account authorization/legacy login state.');
-        DB::statement('ALTER TABLE users DROP COLUMN is_active, DROP COLUMN role, MODIFY email VARCHAR(191) NOT NULL');
+        if (!DB::connection()->pretending() && (self::state()!=='prepared' || DB::table('users')->where('peran','<>','kasir')->orWhere('aktif',false)->orWhereNull('email')->exists())) throw new RuntimeException('Rollback would lose account authorization/legacy login state.');
+        DB::statement('ALTER TABLE users DROP COLUMN aktif, DROP COLUMN peran, MODIFY email VARCHAR(191) NOT NULL');
     }
 }

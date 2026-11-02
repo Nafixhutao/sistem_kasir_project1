@@ -68,7 +68,7 @@ class TransactionalBackupRestoreTest extends TestCase
         // Include normal cash sale + detail rows in the full replacement test.
         $this->postJson('/api/penjualan', ['items'=>[['id'=>$linked->id,'jumlah'=>1]],'metode_pembayaran'=>'tunai','uang_bayar'=>15000])->assertOk();
         // Restore must not silently re-enable providers supplied by the backup.
-        DB::table('providers')->orderBy('id')->limit(1)->update(['is_active'=>false]);
+        DB::table('providers')->orderBy('id')->limit(1)->update(['aktif'=>false]);
         $backup = $this->backup(); $accounts = $this->snapshot();
         Supplier::whereKey($supplier->id)->update(['nama_supplier'=>'Changed after backup']);
         Barang::whereKey($linked->id)->update(['stok'=>2, 'supplier_id'=>null]);
@@ -81,8 +81,8 @@ class TransactionalBackupRestoreTest extends TestCase
         $this->assertDatabaseMissing('suppliers',['id'=>$extra->id]);
         $after = $this->snapshot();
         foreach ($accounts as $table=>$digest) if ($table !== 'activity_logs') $this->assertTrue($digest === $after[$table], 'Row mismatch: '.$table);
-        $log = ActivityLog::where('module','Backup')->where('action','restore')->latest('id')->first();
-        $this->assertSame($actor->username, $log->user_name);
+        $log = ActivityLog::where('modul','Backup')->where('aksi','restore')->latest('id')->first();
+        $this->assertSame($actor->username, $log->nama_pengguna);
         $this->assertSame([], $log->properties);
         $this->assertSame(count($backup['tables']['activity_logs'])+1, ActivityLog::count());
         $this->assertSame(1, (int) DB::selectOne('SELECT @@SESSION.foreign_key_checks AS enabled')->enabled);
@@ -112,10 +112,10 @@ class TransactionalBackupRestoreTest extends TestCase
         $bad = $backup; $bad['tables']['barang'][0]['supplier_id'] = 4294967295; $cases[] = $bad;
         $bad = $backup; $bad['tables']['barang'][] = $bad['tables']['barang'][0]; $cases[] = $bad;
         $bad = $backup; $bad['tables']['barang'][0]['nama_barang'] = str_repeat('x', 1000); $cases[] = $bad;
-        $bad = $backup; $bad['tables']['barang'][0]['created_at'] = '2026-02-31 12:00:00'; $cases[] = $bad;
+        $bad = $backup; $bad['tables']['barang'][0]['dibuat_pada'] = '2026-02-31 12:00:00'; $cases[] = $bad;
         $bad = $backup; $bad['tables']['barang'][0]['stok'] = 42949672960; $cases[] = $bad;
         $bad = $backup; $bad['tables']['transaksi_penjualan'][0]['metode_pembayaran'] = 'not-an-enum-value'; $cases[] = $bad;
-        $bad = $backup; $bad['tables']['activity_logs'][0]['properties'] = '{invalid'; $cases[] = $bad;
+        $bad = $backup; $bad['tables']['activity_logs'][0]['properti'] = '{invalid'; $cases[] = $bad;
         $writes = 0;
         DB::listen(function (QueryExecuted $event) use (&$writes) { if (preg_match('/^\s*(delete|insert|update|alter|truncate)\b/i', $event->sql)) $writes++; });
         foreach ($cases as $bad) {

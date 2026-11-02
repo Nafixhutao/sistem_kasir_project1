@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class TransaksiPenjualan extends Model
+
+class TransaksiPenjualan extends BaseModel
 {
     protected $table = 'transaksi_penjualan';
     protected $hidden = ['request_hash'];

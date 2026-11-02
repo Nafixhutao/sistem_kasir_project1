@@ -1,9 +1,9 @@
 <?php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 
-class IdempotencyRecord extends Model
+
+class IdempotencyRecord extends BaseModel
 {
     public const SCOPES=[
         'penjualan'=>TransaksiPenjualan::class,

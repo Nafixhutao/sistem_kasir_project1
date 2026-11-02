@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 const empty = { nama_supplier: '', no_telepon: '', alamat: '', keterangan: '' }
 export default function DataSupplier() {
   const { user } = useAuth()
-  const canManage = user?.role === 'admin'
+  const canManage = user?.peran === 'admin'
   const [suppliers, setSuppliers] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')

@@ -12,7 +12,7 @@ class BarangController extends Controller
 {
     public function index()
     {
-        return response()->json(Barang::with('supplier:id,nama_supplier')->orderBy('created_at', 'desc')->get());
+        return response()->json(Barang::with('supplier:id,nama_supplier')->orderBy('dibuat_pada', 'desc')->get());
     }
 
     public function store(Request $request)

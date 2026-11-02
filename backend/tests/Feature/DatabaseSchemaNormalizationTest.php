@@ -16,23 +16,23 @@ class DatabaseSchemaNormalizationTest extends TestCase
     ];
 
     private const VARCHAR_TARGETS = [
-        'users' => ['name' => 50, 'username' => 50, 'password' => 255, 'remember_token' => 100],
+        'users' => ['nama' => 50, 'username' => 50, 'password' => 255, 'remember_token' => 100],
         'barang' => ['kode_barang' => 50, 'nama_barang' => 150, 'kategori' => 100],
         'transaksi_penjualan' => ['kode_transaksi' => 50, 'kasir' => 100],
         'detail_penjualan' => ['kode_barang' => 50, 'nama_barang' => 150],
         'pembayaran_qris' => ['order_id' => 100, 'snap_token' => 255, 'transaction_id' => 100],
-        'transaksi_transfer' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'jenis_transfer' => 50, 'bank_tujuan' => 100, 'nomor_rekening_tujuan' => 30, 'nama_penerima' => 100, 'kasir' => 100],
-        'transaksi_tarik_tunai' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'nomor_rekening' => 30, 'nama_penerima' => 100, 'nomor_hp' => 20, 'kasir' => 100],
-        'transaksi_setor_tunai' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'nomor_rekening_tujuan' => 30, 'nama_pemilik_rekening' => 100, 'bank_tujuan' => 100, 'sumber_dana' => 100, 'kasir' => 100],
-        'pembayaran_tagihan' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'nomor_pelanggan' => 50, 'nama_pelanggan' => 100, 'kasir' => 100],
-        'transaksi_pulsa' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'operator' => 50, 'nomor_tujuan' => 20, 'produk' => 150, 'kasir' => 100],
-        'transaksi_ewallet' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_ewallet' => 100, 'nomor_ewallet' => 30, 'nama_customer' => 100, 'kasir' => 100],
+        'transaksi_transfer' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_kartu' => 50, 'jenis_transfer' => 50, 'bank_tujuan' => 100, 'nomor_rekening_tujuan' => 30, 'nama_penerima' => 100, 'kasir' => 100],
+        'transaksi_tarik_tunai' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_kartu' => 50, 'nomor_rekening' => 30, 'nama_penerima' => 100, 'nomor_hp' => 20, 'kasir' => 100],
+        'transaksi_setor_tunai' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_kartu' => 50, 'nomor_rekening_tujuan' => 30, 'nama_pemilik_rekening' => 100, 'bank_tujuan' => 100, 'sumber_dana' => 100, 'kasir' => 100],
+        'pembayaran_tagihan' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_kartu' => 50, 'nomor_pelanggan' => 50, 'nama_pelanggan' => 100, 'kasir' => 100],
+        'transaksi_pulsa' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_kartu' => 50, 'operator' => 50, 'nomor_tujuan' => 20, 'produk' => 150, 'kasir' => 100],
+        'transaksi_ewallet' => ['kode_transaksi' => 50, 'penyedia' => 100, 'jenis_ewallet' => 100, 'nomor_ewallet' => 30, 'nama_customer' => 100, 'kasir' => 100],
         'biaya_admin_brilink' => ['jenis_transaksi' => 50, 'jenis_kartu' => 50],
         'providers' => ['nama_provider' => 100],
         'pengeluaran_toko' => ['kategori' => 100, 'nama_pengeluaran' => 150, 'kasir' => 100],
         'retur_pelanggan' => ['nomor_retur' => 50, 'kode_transaksi' => 50, 'kode_barang' => 50, 'nama_barang' => 150, 'alasan_retur' => 255, 'metode_pengembalian_dana' => 50],
         'retur_supplier' => ['nomor_retur' => 50, 'nama_supplier' => 150, 'kode_barang' => 50, 'nama_barang' => 150, 'kasir' => 100],
-        'activity_logs' => ['user_name' => 100, 'module' => 50, 'action' => 50],
+        'activity_logs' => ['nama_pengguna' => 100, 'modul' => 50, 'aksi' => 50],
         'notifikasi' => ['tipe' => 50, 'judul' => 150, 'referensi_tipe' => 100, 'url' => 255, 'fingerprint' => 191],
     ];
 
@@ -47,7 +47,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
     ];
 
     private const SPECIAL_VARCHAR_MODIFIERS = [
-        'activity_logs.user_name' => ['NO', 'admin'],
+        'activity_logs.nama_pengguna' => ['NO', 'admin'],
         'pembayaran_qris.transaction_id' => ['YES', null],
         'pembayaran_tagihan.jenis_kartu' => ['NO', 'Kartu Nasabah'],
         'pembayaran_tagihan.kasir' => ['NO', 'admin'],
@@ -89,7 +89,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
         'retur_supplier.retur_supplier_nomor_retur_unique' => [['nomor_retur'], true],
         'biaya_admin_brilink.biaya_admin_brilink_lookup' => [['jenis_transaksi', 'jenis_nasabah', 'nominal_min'], false],
         'notifikasi.notifikasi_user_fingerprint_unique' => [['user_id', 'fingerprint'], true],
-        'notifikasi.notifikasi_user_read_created_index' => [['user_id', 'dibaca_at', 'created_at'], false],
+        'notifikasi.notifikasi_user_read_created_index' => [['user_id', 'dibaca_at', 'dibuat_pada'], false],
         'notifikasi.notifikasi_referensi_index' => [['referensi_tipe', 'referensi_id'], false],
         'notifikasi.notifikasi_tipe_index' => [['tipe'], false],
     ];
@@ -219,7 +219,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
         $usernameComplete = DB::table('migrations')->where('migration', '2026_10_08_000001_remove_legacy_email_from_users')->exists();
         // The only removed non-varchar column is legacy users.email_verified_at.
         $this->assertSame($usernameComplete ? 39 : 40, $actualTypes['timestamp|timestamp'] ?? 0);
-        $roleComplete = \Illuminate\Support\Facades\Schema::hasColumn('users','is_active');
+        $roleComplete = \Illuminate\Support\Facades\Schema::hasColumn('users','aktif');
         $this->assertSame($roleComplete ? 4 : 3, $actualTypes['tinyint|tinyint(1)'] ?? 0);
 
         $orphanChecks = [

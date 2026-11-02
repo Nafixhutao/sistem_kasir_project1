@@ -15,7 +15,7 @@ class OperationsWorkflowTest extends TestCase
         Sanctum::actingAs($cashier);
 
         $this->postJson('/api/transfer', [
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'jenis_transfer' => 'Antar Bank',
             'bank_tujuan' => 'BCA',
             'nomor_rekening_tujuan' => '000123456789',
@@ -25,7 +25,7 @@ class OperationsWorkflowTest extends TestCase
         ])->assertCreated()->assertJsonPath('nomor_rekening_tujuan', '000123456789');
 
         $this->postJson('/api/tarik-tunai', [
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'nomor_rekening' => '000987654321',
             'nama_penerima' => 'Penerima Test',
             'nomor_hp' => '081234567890',
@@ -34,7 +34,7 @@ class OperationsWorkflowTest extends TestCase
         ])->assertCreated()->assertJsonPath('nomor_rekening', '000987654321');
 
         $this->postJson('/api/setor-tunai', [
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'jenis_setoran' => 'biasa',
             'nomor_rekening_tujuan' => '000111222333',
             'nama_pemilik_rekening' => 'Pemilik Test',
@@ -45,7 +45,7 @@ class OperationsWorkflowTest extends TestCase
         ])->assertCreated()->assertJsonPath('nomor_rekening_tujuan', '000111222333');
 
         $this->postJson('/api/tagihan', [
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'jenis_layanan' => 'pln',
             'nomor_pelanggan' => '000444555666',
             'nama_pelanggan' => 'Pelanggan Test',
@@ -54,7 +54,7 @@ class OperationsWorkflowTest extends TestCase
         ])->assertCreated()->assertJsonPath('nomor_pelanggan', '000444555666');
 
         $this->postJson('/api/pulsa', [
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'operator' => 'Telkomsel',
             'jenis_layanan' => 'pulsa',
             'nomor_tujuan' => '081200001234',
@@ -65,7 +65,7 @@ class OperationsWorkflowTest extends TestCase
 
         $this->postJson('/api/ewallet', [
             'jenis_transaksi' => 'top_up',
-            'provider' => 'BRILink Mobile',
+            'penyedia' => 'BRILink Mobile',
             'jenis_ewallet' => 'DANA',
             'nomor_ewallet' => '081200009999',
             'nama_customer' => 'Customer Test',
@@ -133,38 +133,38 @@ class OperationsWorkflowTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
 
         $this->postJson('/api/transfer', [
-            'provider' => 'BRILink Mobile', 'jenis_transfer' => 'Antar Bank',
+            'penyedia' => 'BRILink Mobile', 'jenis_transfer' => 'Antar Bank',
             'bank_tujuan' => 'BCA', 'nomor_rekening_tujuan' => str_repeat('1', 31),
             'nama_penerima' => 'Penerima', 'jenis_nasabah' => 'internal', 'nominal_transfer' => 100000,
         ])->assertUnprocessable()->assertJsonValidationErrors('nomor_rekening_tujuan');
 
         $this->postJson('/api/tarik-tunai', [
-            'provider' => 'BRILink Mobile', 'nomor_rekening' => '00123456789',
+            'penyedia' => 'BRILink Mobile', 'nomor_rekening' => '00123456789',
             'nama_penerima' => 'Penerima', 'nomor_hp' => str_repeat('1', 21),
             'jenis_nasabah' => 'internal', 'nominal_tarik' => 100000,
         ])->assertUnprocessable()->assertJsonValidationErrors('nomor_hp');
 
         $this->postJson('/api/setor-tunai', [
-            'provider' => 'BRILink Mobile', 'jenis_setoran' => 'biasa',
+            'penyedia' => 'BRILink Mobile', 'jenis_setoran' => 'biasa',
             'nomor_rekening_tujuan' => '00123456789', 'nama_pemilik_rekening' => 'Pemilik',
             'bank_tujuan' => str_repeat('B', 101), 'jenis_nasabah' => 'internal',
             'nominal_setor' => 100000, 'sumber_dana' => 'Tunai',
         ])->assertUnprocessable()->assertJsonValidationErrors('bank_tujuan');
 
         $this->postJson('/api/tagihan', [
-            'provider' => 'BRILink Mobile', 'jenis_layanan' => 'pln',
+            'penyedia' => 'BRILink Mobile', 'jenis_layanan' => 'pln',
             'nomor_pelanggan' => str_repeat('1', 51), 'nama_pelanggan' => 'Pelanggan',
             'jenis_nasabah' => 'internal', 'jumlah_tagihan' => 100000,
         ])->assertUnprocessable()->assertJsonValidationErrors('nomor_pelanggan');
 
         $this->postJson('/api/pulsa', [
-            'provider' => 'BRILink Mobile', 'operator' => 'Telkomsel', 'jenis_layanan' => 'pulsa',
+            'penyedia' => 'BRILink Mobile', 'operator' => 'Telkomsel', 'jenis_layanan' => 'pulsa',
             'nomor_tujuan' => str_repeat('1', 21), 'produk' => 'Pulsa',
             'jenis_nasabah' => 'internal', 'harga' => 50000,
         ])->assertUnprocessable()->assertJsonValidationErrors('nomor_tujuan');
 
         $this->postJson('/api/ewallet', [
-            'jenis_transaksi' => 'top_up', 'provider' => 'BRILink Mobile', 'jenis_ewallet' => 'DANA',
+            'jenis_transaksi' => 'top_up', 'penyedia' => 'BRILink Mobile', 'jenis_ewallet' => 'DANA',
             'nomor_ewallet' => str_repeat('1', 31), 'nama_customer' => 'Customer', 'nominal' => 50000,
         ])->assertUnprocessable()->assertJsonValidationErrors('nomor_ewallet');
 

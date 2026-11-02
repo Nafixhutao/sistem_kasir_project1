@@ -43,7 +43,7 @@ class FeeAuthorizationTest extends TestCase
         foreach (array_keys(BiayaAdminBrilink::layanan()) as $service) {
             $payload=$this->payload(BiayaAdminBrilink::usesNasabah($service)?'internal':null);
             $this->putJson('/api/biaya-admin/'.$service,$payload)->assertForbidden();
-            $this->putJson('/api/biaya-admin/'.$service,$payload+['role'=>'admin'])->assertForbidden();
+            $this->putJson('/api/biaya-admin/'.$service,$payload+['peran'=>'admin'])->assertForbidden();
         }
         $this->assertSame('kasir',$user->fresh()->role); $this->assertTrue($before===$this->feesDigest());
         // There are no standalone create/delete routes in the existing module.
@@ -57,10 +57,10 @@ class FeeAuthorizationTest extends TestCase
         // Isolate one tariff group in this test transaction; never mutate persistent baseline.
         DB::table('biaya_admin_brilink')->where('jenis_transaksi','ewallet')->delete();
         $this->putJson('/api/biaya-admin/ewallet',$this->payload())->assertOk()->assertJsonPath('0.biaya_admin',4321);
-        $this->assertSame($admin->username,ActivityLog::latest('id')->first()->user_name);
+        $this->assertSame($admin->username,ActivityLog::latest('id')->first()->nama_pengguna);
         $this->actor('kasir');
         $this->getJson('/api/biaya-admin')->assertOk();
-        $this->postJson('/api/ewallet',['jenis_transaksi'=>'top_up','provider'=>'BRILink Mobile','jenis_ewallet'=>'DANA','nomor_ewallet'=>'081200001234','nama_customer'=>'Temporary fee fixture','nominal'=>50000])->assertCreated()->assertJsonPath('biaya_admin',4321);
+        $this->postJson('/api/ewallet',['jenis_transaksi'=>'top_up','penyedia'=>'BRILink Mobile','jenis_ewallet'=>'DANA','nomor_ewallet'=>'081200001234','nama_customer'=>'Temporary fee fixture','nominal'=>50000])->assertCreated()->assertJsonPath('biaya_admin',4321);
     }
     public function test_admin_can_set_internal_external_tariffs_and_other_groups_remain_unchanged(): void
     {

@@ -41,7 +41,7 @@ const finalReturStatuses = ['diterima', 'ditolak']
 export default function ReturSupplier() {
   const businessRequest = useBusinessRequest()
   const { user } = useAuth()
-  const canWrite = user?.role === 'kasir'
+  const canWrite = user?.peran === 'kasir'
   const [data, setData] = useState([])
   const [barang, setBarang] = useState([])
   const [form, setForm] = useState(emptyForm)

@@ -13,14 +13,14 @@ class AuthenticationAndInventoryTest extends TestCase
     {
         $username = 'codex_'.Str::lower(Str::random(10));
         User::create([
-            'name' => 'Codex Test Admin',
+            'nama' => 'Codex Test Admin',
             'username' => $username,
             'password' => Hash::make('admin123'),
         ]);
 
         $login = $this->postJson('/api/login', ['username' => $username, 'password' => 'admin123'])
             ->assertOk()
-            ->assertJsonStructure(['message', 'user' => ['id', 'name', 'username'], 'token']);
+            ->assertJsonStructure(['message', 'user' => ['id', 'nama', 'username'], 'token']);
         $token = $login->json('token');
 
         $code = '000'.Str::upper(Str::random(7));

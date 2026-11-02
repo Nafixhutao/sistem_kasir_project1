@@ -23,11 +23,11 @@ class AuthController extends Controller
 
         return DB::transaction(function () use ($data) {
             $user = User::where('username', $data['username'])->lockForUpdate()->first();
-            if (!$user || !$user->is_active || !Hash::check($data['password'], $user->password)) {
+            if (!$user || !$user->aktif || !Hash::check($data['password'], $user->password)) {
                 return response()->json(['message' => 'Username atau password salah'], 401);
             }
             $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json(['message'=>'Login berhasil', 'user'=>$user->only(['id','name','username','role']), 'token'=>$token]);
+            return response()->json(['message'=>'Login berhasil', 'user'=>$user->only(['id','nama','username','peran']), 'token'=>$token]);
         });
     }
 
@@ -79,7 +79,7 @@ class AuthController extends Controller
         }
 
         $target = User::where('username', $data['username'])->first();
-        if (!$target || !$target->is_active) {
+        if (!$target || !$target->aktif) {
             throw ValidationException::withMessages(['username' => 'Akun tidak ditemukan atau tidak aktif.']);
         }
 
@@ -98,6 +98,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user()->only(['id','name','username','role']));
+        return response()->json($request->user()->only(['id','nama','username','peran']));
     }
 }

@@ -117,7 +117,7 @@ export default function CustomerReturnModal({ open, transaction, loading, onClos
 
               <div className="return-info-grid">
                 <div className="return-info-item"><span>Nomor Transaksi</span><strong>{transaction.kode_transaksi}</strong></div>
-                <div className="return-info-item"><span>Tanggal Transaksi</span><strong>{formatDateTime(transaction.created_at || transaction.tanggal)}</strong></div>
+                <div className="return-info-item"><span>Tanggal Transaksi</span><strong>{formatDateTime(transaction.dibuat_pada || transaction.tanggal)}</strong></div>
                 <div className="return-info-item"><span>Nama Barang</span><strong>{selectedDetail?.nama_barang || '-'}</strong></div>
                 <div className="return-info-item"><span>Kode Barang</span><strong>{selectedDetail?.kode_barang || '-'}</strong></div>
                 <div className="return-info-item"><span>Jumlah Dibeli</span><strong>{jumlahDibeli} pcs</strong></div>

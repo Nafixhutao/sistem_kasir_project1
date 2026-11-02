@@ -78,7 +78,7 @@ class TransitionAuthentication extends Command
             $after=DB::table('users')->orderBy('id')->get()->map(fn($r)=>(array)$r)->all();
             if (count($before)!==count($after)) throw new RuntimeException('Account count changed.');
             foreach ($before as $i=>$row) {
-                foreach (['id','name','password','remember_token','created_at','updated_at'] as $field) if ($row[$field]!==$after[$i][$field]) throw new RuntimeException('Account invariant changed.');
+                foreach (['id','nama','password','remember_token','dibuat_pada','diperbarui_pada'] as $field) if ($row[$field]!==$after[$i][$field]) throw new RuntimeException('Account invariant changed.');
                 if (($row['username']??$row['email'])!==($after[$i]['username']??$after[$i]['email'])) throw new RuntimeException('Login identity changed.');
             }
             $this->info('PASS stage='.$stage.'; AUTH_STATE='.AuthTransitionSchema::state().'; account identity/hash/timestamps unchanged.');

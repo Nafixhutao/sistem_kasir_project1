@@ -40,7 +40,7 @@ const formatPenyelesaian = (value) => {
 export default function ReturBarangPelanggan() {
   const businessRequest = useBusinessRequest()
   const { user } = useAuth()
-  const canWrite = user?.role === 'kasir'
+  const canWrite = user?.peran === 'kasir'
   const [transactions, setTransactions] = useState([])
   const [transactionLoading, setTransactionLoading] = useState(false)
   const [transactionError, setTransactionError] = useState('')
@@ -399,7 +399,7 @@ export default function ReturBarangPelanggan() {
         {selectedTransaction && (
           <div className="detail-grid">
             <div><span>Nomor Transaksi</span><strong>{selectedTransaction.kode_transaksi}</strong></div>
-            <div><span>Tanggal</span><strong>{formatDateTime(selectedTransaction.created_at || selectedTransaction.tanggal)}</strong></div>
+            <div><span>Tanggal</span><strong>{formatDateTime(selectedTransaction.dibuat_pada || selectedTransaction.tanggal)}</strong></div>
             <div><span>Status</span><strong>{selectedTransaction.status}</strong></div>
             <div><span>Pembayaran</span><strong>{selectedTransaction.metode_pembayaran?.toUpperCase() || '-'}</strong></div>
             <div><span>Total</span><strong>{formatRupiah(selectedTransaction.total_harga)}</strong></div>

@@ -139,9 +139,9 @@ export default function BrilinkReceiptModal({ isOpen, onClose, receipt }) {
 
             <div className="receipt-meta">
               <div><span>No</span><strong>{item.kode_transaksi}</strong></div>
-              <div><span>Waktu</span><strong>{formatReceiptDate(item.created_at || item.tanggal)}</strong></div>
+              <div><span>Waktu</span><strong>{formatReceiptDate(item.dibuat_pada || item.tanggal)}</strong></div>
               <div><span>Layanan</span><strong>{config.service}</strong></div>
-              <div><span>Provider</span><strong>{item.provider || '-'}</strong></div>
+              <div><span>Penyedia</span><strong>{item.penyedia || '-'}</strong></div>
               <div><span>Status</span><strong>{humanize(item.status || 'sukses')}</strong></div>
             </div>
 
@@ -176,7 +176,7 @@ export default function BrilinkReceiptModal({ isOpen, onClose, receipt }) {
 
             <div className="receipt-footer">
               <p>Transaksi berhasil dicatat</p>
-              <span>Bukti ini adalah bukti pendataan pada sistem web Sultan Cell, bukan bukti resmi aplikasi provider.</span>
+              <span>Bukti ini adalah bukti pendataan pada sistem web Sultan Cell, bukan bukti resmi aplikasi penyedia.</span>
             </div>
           </div>
 
