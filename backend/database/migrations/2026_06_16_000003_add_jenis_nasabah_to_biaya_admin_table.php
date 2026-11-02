@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\BiayaAdmin;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -8,6 +7,30 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Tarif BRILink per jenis nasabah. Nilainya sengaja ditulis di dalam migrasi
+     * (bukan diambil dari model) karena model App\Models\BiayaAdmin sudah dihapus
+     * bersama tabel biaya_admin; migrasi lama harus tetap bisa jalan sendiri.
+     */
+    private function rangeNasabah(string $jenisNasabah): array
+    {
+        return $jenisNasabah === 'eksternal'
+            ? [
+                ['min' => 1, 'max' => 100000, 'biaya' => 5000],
+                ['min' => 100001, 'max' => 500000, 'biaya' => 8000],
+                ['min' => 500001, 'max' => 1000000, 'biaya' => 12000],
+                ['min' => 1000001, 'max' => 2000000, 'biaya' => 18000],
+                ['min' => 2000001, 'max' => null, 'biaya' => 25000],
+            ]
+            : [
+                ['min' => 1, 'max' => 100000, 'biaya' => 2000],
+                ['min' => 100001, 'max' => 500000, 'biaya' => 5000],
+                ['min' => 500001, 'max' => 1000000, 'biaya' => 10000],
+                ['min' => 1000001, 'max' => 2000000, 'biaya' => 15000],
+                ['min' => 2000001, 'max' => null, 'biaya' => 20000],
+            ];
+    }
+
     public function up(): void
     {
         Schema::table('biaya_admin', function (Blueprint $table) {
@@ -23,7 +46,7 @@ return new class extends Migration
                 [
                     'jenis_biaya' => 'range',
                     'nilai' => 0,
-                    'aturan_range' => json_encode(BiayaAdmin::rangeNasabah($jenisNasabah)),
+                    'aturan_range' => json_encode($this->rangeNasabah($jenisNasabah)),
                     'is_active' => true,
                     'created_at' => now(),
                     'updated_at' => now(),

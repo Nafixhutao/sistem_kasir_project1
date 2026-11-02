@@ -11,12 +11,12 @@ final class BusinessBackup
     public const TABLES = [
         'suppliers', 'barang', 'transaksi_penjualan', 'detail_penjualan', 'pembayaran_qris',
         'transaksi_transfer', 'transaksi_tarik_tunai', 'transaksi_setor_tunai',
-        'pembayaran_tagihan', 'transaksi_pulsa', 'transaksi_ewallet', 'biaya_admin',
+        'pembayaran_tagihan', 'transaksi_pulsa', 'transaksi_ewallet',
         'biaya_admin_brilink', 'providers', 'activity_logs', 'pengeluaran_toko',
         'retur_pelanggan', 'retur_supplier', 'idempotency_records',
     ];
     /** Tabel versi lama yang sudah dihapus dari skema; masih boleh ada di file backup lama dan diabaikan saat restore. */
-    private const LEGACY_TABLES = ['retur_penjualan'];
+    private const LEGACY_TABLES = ['retur_penjualan', 'biaya_admin'];
     private const OPTIONAL = ['suppliers', 'retur_supplier', 'retur_pelanggan', 'providers', 'idempotency_records'];
 
     public static function metadata(): array

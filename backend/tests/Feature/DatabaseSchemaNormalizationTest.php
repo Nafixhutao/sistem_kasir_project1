@@ -10,7 +10,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
     private const BUSINESS_TABLES = [
         'users', 'barang', 'transaksi_penjualan', 'detail_penjualan', 'pembayaran_qris',
         'transaksi_transfer', 'transaksi_tarik_tunai', 'transaksi_setor_tunai',
-        'pembayaran_tagihan', 'transaksi_pulsa', 'transaksi_ewallet', 'biaya_admin',
+        'pembayaran_tagihan', 'transaksi_pulsa', 'transaksi_ewallet',
         'biaya_admin_brilink', 'providers', 'pengeluaran_toko',
         'retur_pelanggan', 'retur_supplier', 'activity_logs', 'notifikasi',
     ];
@@ -27,7 +27,6 @@ class DatabaseSchemaNormalizationTest extends TestCase
         'pembayaran_tagihan' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'nomor_pelanggan' => 50, 'nama_pelanggan' => 100, 'kasir' => 100],
         'transaksi_pulsa' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_kartu' => 50, 'operator' => 50, 'nomor_tujuan' => 20, 'produk' => 150, 'kasir' => 100],
         'transaksi_ewallet' => ['kode_transaksi' => 50, 'provider' => 100, 'jenis_ewallet' => 100, 'nomor_ewallet' => 30, 'nama_customer' => 100, 'kasir' => 100],
-        'biaya_admin' => ['layanan' => 50],
         'biaya_admin_brilink' => ['jenis_transaksi' => 50, 'jenis_kartu' => 50],
         'providers' => ['nama_provider' => 100],
         'pengeluaran_toko' => ['kategori' => 100, 'nama_pengeluaran' => 150, 'kasir' => 100],
@@ -88,7 +87,6 @@ class DatabaseSchemaNormalizationTest extends TestCase
         'providers.providers_nama_provider_unique' => [['nama_provider'], true],
         'retur_pelanggan.retur_pelanggan_nomor_retur_unique' => [['nomor_retur'], true],
         'retur_supplier.retur_supplier_nomor_retur_unique' => [['nomor_retur'], true],
-        'biaya_admin.biaya_admin_layanan_jenis_nasabah_index' => [['layanan', 'jenis_nasabah'], false],
         'biaya_admin_brilink.biaya_admin_brilink_lookup' => [['jenis_transaksi', 'jenis_nasabah', 'nominal_min'], false],
         'notifikasi.notifikasi_user_fingerprint_unique' => [['user_id', 'fingerprint'], true],
         'notifikasi.notifikasi_user_read_created_index' => [['user_id', 'dibaca_at', 'created_at'], false],
@@ -102,7 +100,7 @@ class DatabaseSchemaNormalizationTest extends TestCase
             ->where('TABLE_SCHEMA', DB::connection()->getDatabaseName())
             ->whereIn('TABLE_NAME', self::BUSINESS_TABLES)
             ->count();
-        $this->assertSame(19, $businessTableCount);
+        $this->assertSame(18, $businessTableCount);
 
         foreach (self::BUSINESS_TABLES as $table) {
             $column = $this->column($table, 'id');
@@ -214,15 +212,15 @@ class DatabaseSchemaNormalizationTest extends TestCase
         $actualTypes = collect($typeCounts)->mapWithKeys(
             fn ($row) => ["{$row->DATA_TYPE}|{$row->COLUMN_TYPE}" => (int) $row->total]
         )->all();
-        $this->assertSame(32, $actualTypes['decimal|decimal(15,2)'] ?? 0);
-        $this->assertSame(3, $actualTypes['json|json'] ?? 0);
+        $this->assertSame(31, $actualTypes['decimal|decimal(15,2)'] ?? 0);
+        $this->assertSame(2, $actualTypes['json|json'] ?? 0);
         $this->assertSame(10, $actualTypes['text|text'] ?? 0);
         $this->assertSame(10, $actualTypes['date|date'] ?? 0);
         $usernameComplete = DB::table('migrations')->where('migration', '2026_10_08_000001_remove_legacy_email_from_users')->exists();
         // The only removed non-varchar column is legacy users.email_verified_at.
-        $this->assertSame($usernameComplete ? 40 : 41, $actualTypes['timestamp|timestamp'] ?? 0);
+        $this->assertSame($usernameComplete ? 39 : 40, $actualTypes['timestamp|timestamp'] ?? 0);
         $roleComplete = \Illuminate\Support\Facades\Schema::hasColumn('users','is_active');
-        $this->assertSame($roleComplete ? 5 : 4, $actualTypes['tinyint|tinyint(1)'] ?? 0);
+        $this->assertSame($roleComplete ? 4 : 3, $actualTypes['tinyint|tinyint(1)'] ?? 0);
 
         $orphanChecks = [
             ['detail_penjualan', 'transaksi_penjualan_id', 'transaksi_penjualan', false],
