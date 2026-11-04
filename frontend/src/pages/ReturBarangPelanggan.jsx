@@ -6,6 +6,7 @@ import CustomerReturnModal from '../components/Sales/CustomerReturnModal'
 import api, { getApiErrorMessage } from '../services/api'
 import { formatRupiah } from '../utils/formatRupiah'
 import { useBusinessRequest } from '../hooks/useBusinessRequest'
+import { useAuth } from '../hooks/useAuth'
 
 const toInputDate = (date) => {
   const year = date.getFullYear()
@@ -422,4 +423,3 @@ export default function ReturBarangPelanggan() {
     </div>
   )
 }
-import { useAuth } from '../hooks/useAuth'

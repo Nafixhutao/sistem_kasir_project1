@@ -3,6 +3,7 @@
 use App\Models\BiayaAdminBrilink;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -22,7 +23,18 @@ return new class extends Migration
             $table->index(['jenis_transaksi', 'jenis_nasabah', 'nominal_min'], 'biaya_admin_brilink_lookup');
         });
 
-        BiayaAdminBrilink::ensureDefaults();
+        // Ditulis lewat DB::table memakai nama kolom waktu saat migrasi ini berjalan
+        // (created_at/updated_at). Migrasi tidak boleh memakai model karena model
+        // sudah memakai nama kolom baru (dibuat_pada/diperbarui_pada).
+        $now = now();
+        $rows = array_map(
+            fn (array $row) => $row + ['created_at' => $now, 'updated_at' => $now],
+            BiayaAdminBrilink::defaultRows()
+        );
+
+        foreach (array_chunk($rows, 50) as $chunk) {
+            DB::table('biaya_admin_brilink')->insert($chunk);
+        }
     }
 
     public function down(): void

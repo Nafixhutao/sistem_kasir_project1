@@ -7,6 +7,7 @@ import api, { getApiErrorMessage } from '../services/api'
 import Modal from '../components/Common/Modal'
 import toast from 'react-hot-toast'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { useAuth } from '../hooks/useAuth'
 
 const emptyForm = { kode_barang: '', nama_barang: '', kategori: '', stok: '', harga_beli: '', harga_jual: '', supplier_id: '' }
 
@@ -535,4 +536,3 @@ export default function DataBarang() {
     </div>
   )
 }
-import { useAuth } from '../hooks/useAuth'

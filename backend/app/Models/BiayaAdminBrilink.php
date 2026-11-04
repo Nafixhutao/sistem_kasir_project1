@@ -127,6 +127,39 @@ class BiayaAdminBrilink extends BaseModel
         self::ensureDefaultGroup(self::EWALLET_SERVICE, null);
     }
 
+    /**
+     * Seluruh baris tarif bawaan (tanpa kolom waktu).
+     *
+     * Dipakai oleh seeder dan juga oleh migrasi pembuatan tabel. Migrasi sengaja
+     * memakai daftar ini lewat DB::table (bukan model) karena pada saat migrasi
+     * berjalan nama kolom waktu masih created_at/updated_at.
+     */
+    public static function defaultRows(): array
+    {
+        $rows = [];
+
+        foreach (self::NASABAH_SERVICES as $jenisTransaksi) {
+            foreach (self::JENIS_NASABAH as $jenisNasabah) {
+                $rows = array_merge($rows, self::defaultRowsFor($jenisTransaksi, $jenisNasabah));
+            }
+        }
+
+        return array_merge($rows, self::defaultRowsFor(self::EWALLET_SERVICE, null));
+    }
+
+    private static function defaultRowsFor(string $jenisTransaksi, ?string $jenisNasabah): array
+    {
+        return array_map(fn (array $range) => [
+            'jenis_transaksi' => $jenisTransaksi,
+            'jenis_nasabah' => $jenisNasabah,
+            'jenis_kartu' => $jenisNasabah ? self::jenisKartuNasabah($jenisNasabah) : null,
+            'nominal_min' => $range['nominal_min'],
+            'nominal_max' => $range['nominal_max'],
+            'biaya_admin' => $range['biaya_admin'],
+            'aktif' => true,
+        ], self::defaultRange($jenisNasabah));
+    }
+
     private static function ensureDefaultGroup(string $jenisTransaksi, ?string $jenisNasabah): void
     {
         $exists = self::query()

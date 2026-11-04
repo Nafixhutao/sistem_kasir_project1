@@ -4,6 +4,7 @@ import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
 import { formatDateTime } from '../utils/formatDateTime'
+import { useAuth } from '../hooks/useAuth'
 
 export default function Pengaturan() {
   const { user } = useAuth()
@@ -11,6 +12,7 @@ export default function Pengaturan() {
   const [activeTab, setActiveTab] = useState('aktivitas')
   const [activityData, setActivityData] = useState([])
   const [module, setModule] = useState('semua')
+  const [modulList, setModulList] = useState([])
   const [search, setSearch] = useState('')
   const [backupLoading, setBackupLoading] = useState(false)
   const [restoreLoading, setRestoreLoading] = useState(false)
@@ -18,11 +20,17 @@ export default function Pengaturan() {
   const [confirmText, setConfirmText] = useState('')
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false)
 
+  useEffect(() => {
+    api.get('/activity-logs/modul')
+      .then(res => setModulList(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setModulList([]))
+  }, [])
+
   useEffect(() => { fetchActivity() }, [module])
 
   const fetchActivity = async () => {
     try {
-      const res = await api.get(`/activity-logs?module=${module}&search=${encodeURIComponent(search)}`)
+      const res = await api.get(`/activity-logs?modul=${module}&search=${encodeURIComponent(search)}`)
       setActivityData(res.data)
     } catch (e) {
       toast.error(getApiErrorMessage(e, 'Gagal memuat riwayat aktivitas'))
@@ -102,7 +110,7 @@ export default function Pengaturan() {
         <>
           <section className="brilink-filter-panel activity-filter-panel">
             <label className="field-group"><span>Cari Aktivitas</span><input maxLength={100} value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && fetchActivity()} placeholder="Cari modul, aksi, atau keterangan" /></label>
-            <label className="field-group"><span>Modul</span><select value={module} onChange={e => setModule(e.target.value)}><option value="semua">Semua</option><option>Barang</option><option>Penjualan</option><option>E-Wallet</option><option>Pengeluaran</option><option>Backup</option><option>Biaya Admin</option><option>Auth</option><option>Midtrans</option></select></label>
+            <label className="field-group"><span>Modul</span><select value={module} onChange={e => setModule(e.target.value)}><option value="semua">Semua</option>{modulList.map(m => <option key={m}>{m}</option>)}</select></label>
             <button type="button" onClick={fetchActivity} className="filter-search-button"><Search size={17} />Cari</button>
           </section>
 
@@ -180,4 +188,3 @@ export default function Pengaturan() {
     </div>
   )
 }
-import { useAuth } from '../hooks/useAuth'

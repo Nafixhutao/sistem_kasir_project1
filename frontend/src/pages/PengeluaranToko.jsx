@@ -5,6 +5,7 @@ import { formatNominalInput, parseNominalInput } from '../utils/nominalInput'
 import api, { getApiErrorMessage } from '../services/api'
 import toast from 'react-hot-toast'
 import Modal from '../components/Common/Modal'
+import { useAuth } from '../hooks/useAuth'
 
 const toInputDate = (date) => {
   const year = date.getFullYear()
@@ -140,4 +141,3 @@ export default function PengeluaranToko() {
     </div>
   )
 }
-import { useAuth } from '../hooks/useAuth'

@@ -7,13 +7,20 @@ import { formatDateTime } from '../utils/formatDateTime'
 export default function RiwayatAktivitas() {
   const [data, setData] = useState([])
   const [module, setModule] = useState('semua')
+  const [modulList, setModulList] = useState([])
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    api.get('/activity-logs/modul')
+      .then(res => setModulList(Array.isArray(res.data) ? res.data : []))
+      .catch(() => setModulList([]))
+  }, [])
 
   useEffect(() => { fetchData() }, [module])
 
   const fetchData = async () => {
     try {
-      const res = await api.get(`/activity-logs?module=${module}&search=${encodeURIComponent(search)}`)
+      const res = await api.get(`/activity-logs?modul=${module}&search=${encodeURIComponent(search)}`)
       setData(res.data)
     } catch (e) {
       toast.error(getApiErrorMessage(e, 'Gagal memuat riwayat aktivitas'))
@@ -27,7 +34,7 @@ export default function RiwayatAktivitas() {
       </div>
       <section className="brilink-filter-panel activity-filter-panel">
         <label className="field-group"><span>Cari Aktivitas</span><input maxLength={100} value={search} onChange={e => setSearch(e.target.value)} onKeyDown={e => e.key === 'Enter' && fetchData()} placeholder="Cari modul, aksi, atau keterangan" /></label>
-        <label className="field-group"><span>Modul</span><select value={module} onChange={e => setModule(e.target.value)}><option value="semua">Semua</option><option>Barang</option><option>Penjualan</option><option>E-Wallet</option><option>Pengeluaran</option><option>Backup</option><option>Biaya Admin</option><option>Auth</option><option>Midtrans</option></select></label>
+        <label className="field-group"><span>Modul</span><select value={module} onChange={e => setModule(e.target.value)}><option value="semua">Semua</option>{modulList.map(m => <option key={m}>{m}</option>)}</select></label>
         <button type="button" onClick={fetchData} className="filter-search-button"><Search size={17} />Cari</button>
       </section>
       <section className="brilink-table-panel">

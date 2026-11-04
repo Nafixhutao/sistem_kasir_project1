@@ -16,7 +16,16 @@ class DatabaseSeeder extends Seeder
         User::firstOrCreate(['username' => 'admin'], [
             'nama' => 'Admin Sultan Cell',
             'password' => Hash::make('admin123'),
+            'peran' => 'admin',
+            'aktif' => true,
         ]);
+
+        // Jaga-jaga: bila belum ada satu pun akun admin (mis. instalasi lama yang
+        // sempat membuat akun admin dengan peran bawaan "kasir"), naikkan akun
+        // "admin" agar sistem tetap bisa dikelola.
+        if (!User::where('peran', 'admin')->exists()) {
+            User::where('username', 'admin')->update(['peran' => 'admin', 'aktif' => true]);
+        }
 
         // Tarif semua layanan (termasuk BRILink internal/eksternal) disimpan di
         // biaya_admin_brilink. Tabel biaya_admin versi lama sudah dihapus.

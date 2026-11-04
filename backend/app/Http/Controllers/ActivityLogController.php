@@ -34,4 +34,18 @@ class ActivityLogController extends Controller
 
         return response()->json($query->limit(250)->get());
     }
+
+    /** Daftar modul yang benar-benar ada di riwayat aktivitas (untuk pilihan filter). */
+    public function modul()
+    {
+        $modul = ActivityLog::query()
+            ->select('modul')
+            ->distinct()
+            ->orderBy('modul')
+            ->pluck('modul')
+            ->filter()
+            ->values();
+
+        return response()->json($modul);
+    }
 }

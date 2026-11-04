@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum', \App\Http\Middleware\AccountAccess::class])->
     Route::get('/backup-data', [BackupController::class, 'download']);
     Route::post('/backup-data/restore', [BackupController::class, 'restore']);
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+    Route::get('/activity-logs/modul', [ActivityLogController::class, 'modul']);
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
     Route::get('/notifikasi/unread-count', [NotifikasiController::class, 'count']);
     Route::patch('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);

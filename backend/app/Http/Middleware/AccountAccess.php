@@ -24,7 +24,7 @@ class AccountAccess
             if (!$view && !$manage) abort(403);
         }
         if ($role === 'admin' && !$management && !$fees && !$suppliers) {
-            $read = $request->isMethod('GET') && preg_match('~^api/(?:me|dashboard|barang(?:/[0-9]+)?|barang-search|laporan/(?:penjualan|retur-pelanggan)|riwayat-brilink|pengeluaran-toko|retur-supplier(?:/[0-9]+)?|activity-logs|notifikasi(?:/unread-count)?)$~D',$path);
+            $read = $request->isMethod('GET') && preg_match('~^api/(?:me|dashboard|barang(?:/[0-9]+)?|barang-search|laporan/(?:penjualan|retur-pelanggan)|riwayat-brilink|pengeluaran-toko|retur-supplier(?:/[0-9]+)?|activity-logs(?:/modul)?|notifikasi(?:/unread-count)?)$~D',$path);
             $own = ($request->isMethod('POST') && in_array($path,['api/logout','api/change-password'],true))
                 || ($request->isMethod('PATCH') && preg_match('~^api/notifikasi/(?:[0-9]+/read|read-all)$~D',$path));
             if (!$read && !$own) abort(403);
